@@ -35,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
       <body
         className={`${dmSans.variable} ${ibmPlexMono.variable} font-sans antialiased`}
         style={{ fontFamily: "var(--font-dm-sans), system-ui, sans-serif" }}

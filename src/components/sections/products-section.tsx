@@ -12,7 +12,7 @@ const products = [
     id: 1,
     title: "Electric ATV",
     description: "Experience the thrill of off-road adventures with our electric ATVs. Built for power and agility, our vehicles offer an exhilarating ride through rugged terrains, delivering an unmatched outdoor experience.",
-    image: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=2070&auto=format&fit=crop",
+    image: "/EonTrail.png",
     badge: "Adventure",
     features: ["Zero Emissions", "High Torque", "All-Terrain"],
     href: "/converted-atv",

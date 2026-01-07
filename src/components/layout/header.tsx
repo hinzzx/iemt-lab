@@ -5,10 +5,10 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 const navigation = [
-  { name: "Home", href: "#home" },
-  { name: "Products", href: "#products" },
-  { name: "About Us", href: "#about" },
-  { name: "Contact", href: "#contact" },
+  { name: "Home", href: "/#home" },
+  { name: "Products", href: "/#products" },
+  { name: "About Us", href: "/#about" },
+  { name: "Contact", href: "/#contact" },
 ];
 
 export function Header() {
@@ -44,7 +44,7 @@ export function Header() {
       <nav className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a href="#home" className="flex items-center gap-3 group">
+          <a href="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10 flex items-center justify-center">
               <div className="absolute inset-0 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl transform rotate-6 group-hover:rotate-12 transition-transform duration-400" />
               <div className="relative bg-neutral-950 rounded-xl w-9 h-9 flex items-center justify-center group-hover:scale-95 transition-transform duration-300">
