@@ -1,8 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import { forwardRef, type HTMLAttributes, type ReactNode, type CSSProperties } from "react";
+import { forwardRef, useCallback, type HTMLAttributes, type ReactNode, type CSSProperties } from "react";
 
 type AnimationType = 
   | "fade"
@@ -130,7 +129,7 @@ const Animated = forwardRef<HTMLDivElement, AnimatedProps>(
     },
     forwardedRef
   ) => {
-    const { ref, isVisible } = useScrollAnimation<HTMLDivElement>({
+    const { setRef, isVisible } = useScrollAnimation<HTMLDivElement>({
       threshold,
       triggerOnce,
       delay,
@@ -149,16 +148,21 @@ const Animated = forwardRef<HTMLDivElement, AnimatedProps>(
       ...style,
     };
 
+    // Combine refs safely using callback ref
+    const combinedRef = useCallback((node: HTMLDivElement | null) => {
+      // Set the scroll animation ref
+      setRef(node);
+      // Set the forwarded ref
+      if (typeof forwardedRef === "function") {
+        forwardedRef(node);
+      } else if (forwardedRef) {
+        forwardedRef.current = node;
+      }
+    }, [setRef, forwardedRef]);
+
     return (
       <Component
-        ref={(node) => {
-          (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
-          if (typeof forwardedRef === "function") {
-            forwardedRef(node);
-          } else if (forwardedRef) {
-            forwardedRef.current = node;
-          }
-        }}
+        ref={combinedRef}
         className={className}
         style={combinedStyle}
         {...props}

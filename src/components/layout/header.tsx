@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 
 const navigation = [
@@ -11,21 +12,32 @@ const navigation = [
   { name: "Contact", href: "/#contact" },
 ];
 
-export function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
+// Custom hook for scroll position (avoids setState in useEffect)
+function useScrollPosition() {
+  const subscribe = (callback: () => void) => {
+    window.addEventListener("scroll", callback, { passive: true });
+    return () => window.removeEventListener("scroll", callback);
+  };
+  const getSnapshot = () => window.scrollY > 50;
+  const getServerSnapshot = () => false;
+  
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
 
-  useEffect(() => {
-    // Trigger entrance animation
-    setIsLoaded(true);
-    
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+// Custom hook for mount state using CSS animation instead of setState
+function useMounted() {
+  // Use useSyncExternalStore for hydration-safe mount detection
+  const subscribe = () => () => {};
+  const getSnapshot = () => true;
+  const getServerSnapshot = () => false;
+  
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+export function Header() {
+  const isScrolled = useScrollPosition();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const isLoaded = useMounted();
 
   return (
     <header
@@ -44,7 +56,7 @@ export function Header() {
       <nav className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-10 h-10 flex items-center justify-center">
               <div className="absolute inset-0 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl transform rotate-6 group-hover:rotate-12 transition-transform duration-400" />
               <div className="relative bg-neutral-950 rounded-xl w-9 h-9 flex items-center justify-center group-hover:scale-95 transition-transform duration-300">
@@ -54,12 +66,12 @@ export function Header() {
             <span className="text-xl font-bold text-white tracking-tight group-hover:text-primary-400 transition-colors duration-300">
               iEMT Lab
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
             {navigation.map((item, index) => (
-              <a
+              <Link
                 key={item.name}
                 href={item.href}
                 className="relative px-4 py-2 text-sm font-medium text-neutral-300 hover:text-white group"
@@ -75,7 +87,7 @@ export function Header() {
                 {item.name}
                 {/* Hover underline */}
                 <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-gradient-to-r from-primary-500 to-secondary-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -138,7 +150,7 @@ export function Header() {
         >
           <div className="flex flex-col gap-2 py-4 border-t border-neutral-800/40 bg-neutral-950/95 backdrop-blur-xl rounded-2xl -mx-2 px-2">
             {navigation.map((item, index) => (
-              <a
+              <Link
                 key={item.name}
                 href={item.href}
                 className="px-4 py-3 text-base font-medium text-neutral-300 hover:text-white hover:bg-neutral-800/40 rounded-xl"
@@ -153,7 +165,7 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item.name}
-              </a>
+              </Link>
             ))}
             <div className="pt-2 px-4">
               <Button variant="primary" size="md" className="w-full">
