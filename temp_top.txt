@@ -1,0 +1,463 @@
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import * as THREE from 'three';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { ChevronRight, ChevronLeft, Zap, Battery, Gauge, Shield, Wifi, Check, ArrowRight, Sparkles, Play, Pause, Eye } from 'lucide-react';
+
+// ============================================
+// CACHED MODEL - Load once, clone for each instance
+// ============================================
+let cachedATVModel: THREE.Group | null = null;
+let modelLoadingPromise: Promise<THREE.Group> | null = null;
+
+async function loadATVModel(): Promise<THREE.Group> {
+  // Return cached model if already loaded
+  if (cachedATVModel) {
+    return cachedATVModel.clone();
+  }
+
+  // If already loading, wait for that promise
+  if (modelLoadingPromise) {
+    const model = await modelLoadingPromise;
+    return model.clone();
+  }
+
+  // Start loading
+  modelLoadingPromise = new Promise((resolve, reject) => {
+    const loader = new OBJLoader();
+    loader.load(
+      '/models/ATV.obj',
+      (object) => {
+        // Center the model
+        const box = new THREE.Box3().setFromObject(object);
+        const center = box.getCenter(new THREE.Vector3());
+        object.position.sub(center);
+
+        // Calculate scale to normalize size (target ~2 units wide)
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const targetSize = 2.5;
+        const scale = targetSize / maxDim;
+        object.scale.setScalar(scale);
+
+        // Position on ground
+        const scaledBox = new THREE.Box3().setFromObject(object);
+        object.position.y = -scaledBox.min.y;
+
+        // Enable shadows on all meshes
+        object.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+
+        cachedATVModel = object;
+        resolve(object.clone());
+      },
+      (progress) => {
+        console.log('Loading ATV model:', Math.round((progress.loaded / progress.total) * 100) + '%');
+      },
+      (error) => {
+        console.error('Error loading ATV model:', error);
+        reject(error);
+      }
+    );
+  });
+
+  return modelLoadingPromise;
+}
+
+// Apply color and materials to loaded model
+function applyATVMaterials(
+  model: THREE.Group,
+  bodyColor: THREE.Color,
+  metalness: number
+): void {
+  // Create body material with user-selected color
+  const bodyMaterial = new THREE.MeshPhysicalMaterial({
+    color: bodyColor,
+    roughness: 0.15,
+    metalness: metalness,
+    clearcoat: 0.9,
+    clearcoatRoughness: 0.1,
+    envMapIntensity: 1.2,
+  });
+
+  // Materials for different parts (detected by mesh name or applied uniformly)
+  const chromeMaterial = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff,
+    roughness: 0.05,
+    metalness: 1.0,
+    envMapIntensity: 1.5,
+  });
+
+  const rubberMaterial = new THREE.MeshStandardMaterial({
+    color: 0x0a0a0a,
+    roughness: 0.95,
+    metalness: 0.0,
+  });
+
+  const plasticMaterial = new THREE.MeshPhysicalMaterial({
+    color: 0x1a1a1a,
+    roughness: 0.4,
+    metalness: 0.0,
+    clearcoat: 0.3,
+  });
+
+  const seatMaterial = new THREE.MeshPhysicalMaterial({
+    color: 0x151515,
+    roughness: 0.7,
+    metalness: 0.0,
+    sheen: 0.3,
+    sheenRoughness: 0.8,
+    sheenColor: new THREE.Color(0x222222),
+  });
+
+  // Apply materials based on mesh names (common naming conventions)
+  model.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      const name = child.name.toLowerCase();
+
+      // Try to identify parts by name
+      if (name.includes('body') || name.includes('fender') || name.includes('panel') || name.includes('hood') || name.includes('plastic')) {
+        child.material = bodyMaterial;
+      } else if (name.includes('tire') || name.includes('tyre') || name.includes('wheel') && name.includes('rubber')) {
+        child.material = rubberMaterial;
+      } else if (name.includes('rim') || name.includes('chrome') || name.includes('metal') || name.includes('exhaust')) {
+        child.material = chromeMaterial;
+      } else if (name.includes('seat') || name.includes('saddle')) {
+        child.material = seatMaterial;
+      } else if (name.includes('glass') || name.includes('light') || name.includes('lens')) {
+        child.material = new THREE.MeshPhysicalMaterial({
+          color: 0xffffee,
+          emissive: 0xffffcc,
+          emissiveIntensity: 0.5,
+          transparent: true,
+          opacity: 0.9,
+          roughness: 0.1,
+        });
+      } else {
+        // Default: apply body color to unidentified parts
+        child.material = bodyMaterial;
+      }
+    }
+  });
+}
+
+// ============================================
+// ENVIRONMENT MAP GENERATOR
+// Creates a procedural HDR-like environment for realistic reflections
+// ============================================
+function createStudioEnvironment(renderer: THREE.WebGLRenderer): THREE.Texture {
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+  pmremGenerator.compileEquirectangularShader();
+
+  // Create a scene for the environment
+  const envScene = new THREE.Scene();
+
+  // Create gradient background sphere (inside-out sphere for environment)
+  const envGeometry = new THREE.SphereGeometry(50, 64, 32);
+
+  // Custom shader for studio-like gradient environment
+  const envMaterial = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    uniforms: {
+      topColor: { value: new THREE.Color(0xffffff) },      // Bright top (sky/ceiling lights)
+      horizonColor: { value: new THREE.Color(0xe8e8e8) },  // Neutral horizon
+      bottomColor: { value: new THREE.Color(0xaaaaaa) },   // Darker ground bounce
+      groundColor: { value: new THREE.Color(0x888888) },   // Ground reflection
+    },
+    vertexShader: `
+      varying vec3 vWorldPosition;
+      void main() {
+        vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+        vWorldPosition = worldPosition.xyz;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 topColor;
+      uniform vec3 horizonColor;
+      uniform vec3 bottomColor;
+      uniform vec3 groundColor;
+      varying vec3 vWorldPosition;
+
+      void main() {
+        float h = normalize(vWorldPosition).y;
+
+        vec3 color;
+        if (h > 0.0) {
+          // Sky gradient - top to horizon
+          float t = pow(h, 0.4);
+          color = mix(horizonColor, topColor, t);
+
+          // Add subtle bright spots (simulating soft studio lights)
+          float lightSpot1 = smoothstep(0.7, 1.0, h) * 0.3;
+          color += vec3(lightSpot1);
+        } else {
+          // Ground gradient - horizon to bottom
+          float t = pow(-h, 0.6);
+          color = mix(horizonColor, bottomColor, t);
+
+          // Darker ground area
+          float groundFade = smoothstep(-0.3, -0.8, h);
+          color = mix(color, groundColor, groundFade);
+        }
+
+        gl_FragColor = vec4(color, 1.0);
+      }
+    `
+  });
+
+  const envMesh = new THREE.Mesh(envGeometry, envMaterial);
+  envScene.add(envMesh);
+
+  // Add some bright spots to simulate area lights in the environment
+  const addLightSpot = (position: THREE.Vector3, intensity: number, size: number) => {
+    const spotGeom = new THREE.SphereGeometry(size, 16, 16);
+    const spotMat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(intensity, intensity, intensity * 0.95)
+    });
+    const spot = new THREE.Mesh(spotGeom, spotMat);
+    spot.position.copy(position);
+    envScene.add(spot);
+  };
+
+  // Key light simulation (upper right)
+  addLightSpot(new THREE.Vector3(15, 25, 10), 2.5, 8);
+  // Fill light simulation (upper left)
+  addLightSpot(new THREE.Vector3(-12, 18, -8), 1.5, 6);
+  // Rim light simulation (behind)
+  addLightSpot(new THREE.Vector3(0, 20, -20), 1.8, 5);
+
+  // Generate the environment map
+  const envMap = pmremGenerator.fromScene(envScene, 0.04).texture;
+
+  // Cleanup
+  pmremGenerator.dispose();
+  envGeometry.dispose();
+  envMaterial.dispose();
+
+  return envMap;
+}
+
+// Global environment map reference (cached per session)
+let cachedEnvMap: THREE.Texture | null = null;
+
+// TypeScript Interfaces
+interface ATVModel {
+  id: string;
+  name: string;
+  category: string;
+  basePrice: number;
+  power: string;
+  topSpeed: string;
+  style: 'sport' | 'utility' | 'adventure' | 'youth';
+}
+
+interface VehicleColor {
+  id: string;
+  name: string;
+  hex: string;
+  metalness: number;
+}
+
+interface BatteryOption {
+  id: string;
+  name: string;
+  capacity: string;
+  range: string;
+  price: number;
+  chargeTime: string;
+  size: number;
+}
+
+interface Addon {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  icon: React.ComponentType<{ size?: number; color?: string }>;
+}
+
+// Design System Colors
+const colors = {
+  primary: {
+    50: '#e6f4ff',
+    100: '#b3dfff',
+    200: '#80caff',
+    300: '#4db5ff',
+    400: '#1aa0ff',
+    500: '#0088e6',
+    600: '#006bb4',
+    700: '#004e82',
+  },
+  secondary: {
+    50: '#fff4e6',
+    100: '#ffe0b3',
+    200: '#ffcc80',
+    300: '#ffb84d',
+    400: '#ffa41a',
+    500: '#f08c00',
+    600: '#b86e00',
+  },
+  neutral: {
+    0: '#ffffff',
+    50: '#fafafa',
+    100: '#f4f4f5',
+    200: '#e4e4e7',
+    300: '#d4d4d8',
+    400: '#a1a1aa',
+    500: '#71717a',
+    600: '#52525b',
+    700: '#3f3f46',
+    800: '#27272a',
+    900: '#18181b',
+    950: '#0a0a0b',
+  },
+  success: { 500: '#10b981' },
+};
+
+// Vehicle color options
+const vehicleColors: VehicleColor[] = [
+  { id: 'blue', name: 'Volt Blue', hex: '#0088e6', metalness: 0.7 },
+  { id: 'orange', name: 'Performance Orange', hex: '#f08c00', metalness: 0.6 },
+  { id: 'green', name: 'Electric Green', hex: '#10b981', metalness: 0.6 },
+  { id: 'red', name: 'Racing Red', hex: '#dc2626', metalness: 0.7 },
+  { id: 'black', name: 'Stealth Black', hex: '#1a1a1a', metalness: 0.9 },
+  { id: 'white', name: 'Arctic White', hex: '#f0f0f0', metalness: 0.3 },
+];
+
+const atvModels: ATVModel[] = [
+  { id: 'sport-500', name: 'Sport 500', category: 'Sport', basePrice: 8500, power: '45 kW', topSpeed: '120 km/h', style: 'sport' },
+  { id: 'utility-750', name: 'Utility 750', category: 'Utility', basePrice: 12000, power: '55 kW', topSpeed: '90 km/h', style: 'utility' },
+  { id: 'adventure-600', name: 'Adventure 600', category: 'Adventure', basePrice: 10500, power: '50 kW', topSpeed: '110 km/h', style: 'adventure' },
+  { id: 'youth-250', name: 'Youth 250', category: 'Youth', basePrice: 4500, power: '15 kW', topSpeed: '45 km/h', style: 'youth' },
+];
+
+const batteryOptions: BatteryOption[] = [
+  { id: 'standard', name: 'Standard Range', capacity: '10 kWh', range: '80 km', price: 0, chargeTime: '4 hours', size: 1 },
+  { id: 'extended', name: 'Extended Range', capacity: '15 kWh', range: '120 km', price: 2500, chargeTime: '5 hours', size: 1.25 },
+  { id: 'performance', name: 'Performance Max', capacity: '20 kWh', range: '160 km', price: 4500, chargeTime: '6 hours', size: 1.5 },
+];
+
+const addons: Addon[] = [
+  { id: 'fast-charger', name: 'Fast Charger', description: 'Reduce charge time by 50%', price: 800, icon: Zap },
+  { id: 'battery-monitor', name: 'Smart Battery Monitor', description: 'Real-time battery analytics app', price: 350, icon: Gauge },
+  { id: 'extended-warranty', name: 'Extended Warranty', description: '5-year coverage on all components', price: 1200, icon: Shield },
+  { id: 'connectivity', name: 'GPS & Connectivity Pack', description: 'Track location & remote diagnostics', price: 550, icon: Wifi },
+];
+
+// ============================================
+// MATERIAL CACHE - Hyper-realistic PBR materials
+// Using MeshPhysicalMaterial for metal surfaces
+// ============================================
+const materialCache = {
+  // Frame - dark powder-coated metal
+  frame: new THREE.MeshPhysicalMaterial({
+    color: 0x1a1a1a,
+    roughness: 0.35,
+    metalness: 0.85,
+    envMapIntensity: 0.8,
+  }),
+
+  // Chrome - highly reflective polished metal
+  chrome: new THREE.MeshPhysicalMaterial({
+    color: 0xffffff,
+    roughness: 0.05,          // Very smooth
+    metalness: 1.0,           // Fully metallic
+    envMapIntensity: 1.5,     // Strong reflections
+    reflectivity: 1.0,
+  }),
+
+  // Rubber - matte black tire material
+  rubber: new THREE.MeshStandardMaterial({
+    color: 0x0a0a0a,
+    roughness: 0.95,          // Very rough/matte
+    metalness: 0.0,           // Non-metallic
+  }),
+
+  // Plastic - semi-gloss black plastic
+  plastic: new THREE.MeshPhysicalMaterial({
+    color: 0x1a1a1a,
+    roughness: 0.4,
+    metalness: 0.0,
+    clearcoat: 0.3,           // Slight gloss
+    clearcoatRoughness: 0.4,
+  }),
+
+  // Seat - leather/vinyl texture simulation
+  seat: new THREE.MeshPhysicalMaterial({
+    color: 0x151515,
+    roughness: 0.7,           // Slightly textured leather
+    metalness: 0.0,
+    sheen: 0.3,               // Subtle sheen for leather look
+    sheenRoughness: 0.8,
+    sheenColor: new THREE.Color(0x222222),
+  }),
+
+  // Headlight lens - bright emissive glass
+  light: new THREE.MeshPhysicalMaterial({
+    color: 0xffffee,
+    emissive: 0xffffcc,
+    emissiveIntensity: 1.0,
+    transparent: true,
+    opacity: 0.95,
+    roughness: 0.1,
+    metalness: 0.0,
+    transmission: 0.3,        // Slight glass-like transmission
+    thickness: 0.5,
+  }),
+
+  // Tail light - red emissive
+  tailLight: new THREE.MeshPhysicalMaterial({
+    color: 0xff0000,
+    emissive: 0xff0000,
+    emissiveIntensity: 0.6,
+    roughness: 0.2,
+    metalness: 0.0,
+    transmission: 0.2,
+    thickness: 0.3,
+  }),
+
+  // Battery pack - industrial orange metal
+  battery: new THREE.MeshPhysicalMaterial({
+    color: colors.secondary[500],
+    roughness: 0.3,
+    metalness: 0.7,
+    emissive: new THREE.Color(colors.secondary[500]),
+    emissiveIntensity: 0.1,
+    clearcoat: 0.4,
+    clearcoatRoughness: 0.3,
+  }),
+
+  // Suspension spring - powder-coated orange
+  spring: new THREE.MeshPhysicalMaterial({
+    color: 0xff6600,
+    metalness: 0.9,
+    roughness: 0.25,
+    envMapIntensity: 1.0,
+  }),
+
+  // Seat stitching
+  stitch: new THREE.MeshStandardMaterial({
+    color: 0x333333,
+    roughness: 0.9,
+    metalness: 0.0,
+  }),
+
+  // Digital screen - backlit display
+  screen: new THREE.MeshPhysicalMaterial({
+    color: 0x001122,
+    emissive: 0x0066aa,
+    emissiveIntensity: 0.8,
+    roughness: 0.05,          // Glossy screen
+    metalness: 0.0,
+  }),
+};
+
+// NOTE: Old procedural createDetailedATV function (~750 lines) removed.
+// Now using loadATVModel() to load real 3D model from /models/ATV.obj
+// See applyATVMaterials() for color customization logic.
