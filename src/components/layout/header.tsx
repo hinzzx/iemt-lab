@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 const navigation = [
@@ -27,6 +27,18 @@ function useScrollPosition() {
 export function Header() {
   const isScrolled = useScrollPosition();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
 
   return (
     <header
@@ -81,7 +93,10 @@ export function Header() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden relative w-10 h-10 flex items-center justify-center text-neutral-300 hover:text-white transition-colors"
+            className={cn(
+              "md:hidden relative w-10 h-10 flex items-center justify-center transition-colors z-[60]",
+              isMobileMenuOpen ? "text-white" : "text-neutral-300 hover:text-white"
+            )}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -107,33 +122,67 @@ export function Header() {
             </div>
           </button>
         </div>
+      </nav>
 
-        {/* Mobile Menu */}
-        <div
-          className={cn(
-            "md:hidden overflow-hidden transition-[max-height,opacity] duration-300 ease-out",
-            isMobileMenuOpen ? "max-h-80 opacity-100 mt-4" : "max-h-0 opacity-0"
-          )}
-        >
-          <div className="flex flex-col gap-2 py-4 border-t border-neutral-800/40 bg-neutral-950/95 rounded-2xl -mx-2 px-2">
-            {navigation.map((item) => (
+      {/* Fullscreen Mobile Menu */}
+      <div
+        className={cn(
+          "md:hidden fixed inset-0 bg-neutral-950 z-[55] transition-all duration-300 ease-out",
+          isMobileMenuOpen 
+            ? "opacity-100 pointer-events-auto" 
+            : "opacity-0 pointer-events-none"
+        )}
+      >
+        <div className="flex flex-col items-center justify-center h-full px-6 gap-6">
+          {/* Navigation Links */}
+          <nav className="flex flex-col items-center gap-4 w-full max-w-sm">
+            {navigation.map((item, index) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="px-4 py-3 text-base font-medium text-neutral-300 hover:text-white hover:bg-neutral-800/40 rounded-xl transition-colors duration-200"
+                className={cn(
+                  "text-2xl font-semibold text-neutral-300 hover:text-white transition-all duration-200",
+                  "transform",
+                  isMobileMenuOpen 
+                    ? "translate-y-0 opacity-100" 
+                    : "translate-y-4 opacity-0"
+                )}
+                style={{
+                  transitionDelay: isMobileMenuOpen ? `${index * 50}ms` : "0ms"
+                }}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item.name}
               </Link>
             ))}
-            <div className="pt-2 px-4">
-              <Button variant="primary" size="md" className="w-full">
-                Get Quote
-              </Button>
-            </div>
+          </nav>
+
+          {/* CTA Button */}
+          <div 
+            className={cn(
+              "w-full max-w-sm mt-4 transform transition-all duration-300",
+              isMobileMenuOpen 
+                ? "translate-y-0 opacity-100" 
+                : "translate-y-4 opacity-0"
+            )}
+            style={{
+              transitionDelay: isMobileMenuOpen ? `${navigation.length * 50}ms` : "0ms"
+            }}
+          >
+            <Button 
+              variant="primary" 
+              size="lg" 
+              className="w-full text-lg"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Get Quote
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </Button>
           </div>
         </div>
-      </nav>
+      </div>
     </header>
   );
 }
