@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface UseScrollAnimationOptions {
   threshold?: number;
@@ -19,12 +19,11 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
     delay = 0,
   } = options;
 
-  const elementRef = useRef<T | null>(null);
+  const ref = useRef<T>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const hasTriggeredRef = useRef(false);
 
   useEffect(() => {
-    const element = elementRef.current;
+    const element = ref.current;
     if (!element) return;
 
     const observer = new IntersectionObserver(
@@ -36,7 +35,6 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
             setIsVisible(true);
           }
           if (triggerOnce) {
-            hasTriggeredRef.current = true;
             observer.unobserve(element);
           }
         } else if (!triggerOnce) {
@@ -51,12 +49,7 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
     return () => observer.disconnect();
   }, [threshold, rootMargin, triggerOnce, delay]);
 
-  // Callback ref for setting the element
-  const setRef = useCallback((node: T | null) => {
-    elementRef.current = node;
-  }, []);
-
-  return { ref: elementRef, setRef, isVisible };
+  return { ref, isVisible };
 }
 
 // Hook for staggered children animations
@@ -65,12 +58,13 @@ export function useStaggerAnimation(
   baseDelay: number = 100,
   options: UseScrollAnimationOptions = {}
 ) {
-  const { ref, setRef, isVisible } = useScrollAnimation(options);
+  const { ref, isVisible } = useScrollAnimation(options);
   
   const getDelay = useCallback(
     (index: number) => index * baseDelay,
     [baseDelay]
   );
 
-  return { ref, setRef, isVisible, getDelay };
+  return { ref, isVisible, getDelay };
 }
+
