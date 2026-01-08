@@ -129,7 +129,7 @@ const Animated = forwardRef<HTMLDivElement, AnimatedProps>(
     },
     forwardedRef
   ) => {
-    const { setRef, isVisible } = useScrollAnimation<HTMLDivElement>({
+    const { ref: scrollRef, isVisible } = useScrollAnimation<HTMLDivElement>({
       threshold,
       triggerOnce,
       delay,
@@ -150,15 +150,18 @@ const Animated = forwardRef<HTMLDivElement, AnimatedProps>(
 
     // Combine refs safely using callback ref
     const combinedRef = useCallback((node: HTMLDivElement | null) => {
-      // Set the scroll animation ref
-      setRef(node);
+      // Set the scroll animation ref (RefObject)
+      if (scrollRef && 'current' in scrollRef) {
+        (scrollRef as React.RefObject<HTMLDivElement | null>).current = node;
+      }
+      
       // Set the forwarded ref
       if (typeof forwardedRef === "function") {
         forwardedRef(node);
       } else if (forwardedRef) {
-        forwardedRef.current = node;
+        (forwardedRef as React.RefObject<HTMLDivElement | null>).current = node;
       }
-    }, [setRef, forwardedRef]);
+    }, [scrollRef, forwardedRef]);
 
     return (
       <Component
