@@ -24,34 +24,20 @@ function useScrollPosition() {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
-// Custom hook for mount state using CSS animation instead of setState
-function useMounted() {
-  // Use useSyncExternalStore for hydration-safe mount detection
-  const subscribe = () => () => {};
-  const getSnapshot = () => true;
-  const getServerSnapshot = () => false;
-  
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-}
-
 export function Header() {
   const isScrolled = useScrollPosition();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const isLoaded = useMounted();
 
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        "fixed top-0 left-0 right-0 z-50",
         isScrolled
-          ? "bg-neutral-950/80 backdrop-blur-lg border-b border-neutral-800/40 py-3"
+          ? "bg-neutral-950/95 backdrop-blur-sm border-b border-neutral-800/40 py-3"
           : "bg-transparent py-5",
-        isLoaded ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+        // Smooth transition for scroll state only
+        "transition-[background-color,padding,border-color] duration-300 ease-out"
       )}
-      style={{
-        transitionProperty: "opacity, transform, background-color, padding, border-color",
-        transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
-      }}
     >
       <nav className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between">
@@ -70,19 +56,11 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
-            {navigation.map((item, index) => (
+            {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="relative px-4 py-2 text-sm font-medium text-neutral-300 hover:text-white group"
-                style={{ 
-                  opacity: isLoaded ? 1 : 0,
-                  transform: isLoaded ? "translateY(0)" : "translateY(-10px)",
-                  transitionProperty: "opacity, transform, color",
-                  transitionDuration: "0.6s, 0.6s, 0.3s",
-                  transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1), ease",
-                  transitionDelay: isLoaded ? `${index * 50}ms, ${index * 50}ms, 0ms` : "0ms",
-                }}
+                className="relative px-4 py-2 text-sm font-medium text-neutral-300 hover:text-white transition-colors duration-200 group"
               >
                 {item.name}
                 {/* Hover underline */}
@@ -92,17 +70,7 @@ export function Header() {
           </div>
 
           {/* CTA Button */}
-          <div 
-            className="hidden md:block"
-            style={{ 
-              opacity: isLoaded ? 1 : 0,
-              transform: isLoaded ? "translateY(0)" : "translateY(-10px)",
-              transitionProperty: "opacity, transform",
-              transitionDuration: "0.6s",
-              transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
-              transitionDelay: "0.3s",
-            }}
-          >
+          <div className="hidden md:block">
             <Button variant="primary" size="sm" className="hover-icon-shift">
               Get Quote
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,25 +111,16 @@ export function Header() {
         {/* Mobile Menu */}
         <div
           className={cn(
-            "md:hidden overflow-hidden transition-all duration-500",
+            "md:hidden overflow-hidden transition-[max-height,opacity] duration-300 ease-out",
             isMobileMenuOpen ? "max-h-80 opacity-100 mt-4" : "max-h-0 opacity-0"
           )}
-          style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
         >
-          <div className="flex flex-col gap-2 py-4 border-t border-neutral-800/40 bg-neutral-950/95 backdrop-blur-xl rounded-2xl -mx-2 px-2">
-            {navigation.map((item, index) => (
+          <div className="flex flex-col gap-2 py-4 border-t border-neutral-800/40 bg-neutral-950/95 rounded-2xl -mx-2 px-2">
+            {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="px-4 py-3 text-base font-medium text-neutral-300 hover:text-white hover:bg-neutral-800/40 rounded-xl"
-                style={{ 
-                  opacity: isMobileMenuOpen ? 1 : 0,
-                  transform: isMobileMenuOpen ? "translateX(0)" : "translateX(-10px)",
-                  transitionProperty: "opacity, transform, background-color, color",
-                  transitionDuration: "0.4s, 0.4s, 0.3s, 0.3s",
-                  transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
-                  transitionDelay: isMobileMenuOpen ? `${index * 75}ms, ${index * 75}ms, 0ms, 0ms` : "0ms",
-                }}
+                className="px-4 py-3 text-base font-medium text-neutral-300 hover:text-white hover:bg-neutral-800/40 rounded-xl transition-colors duration-200"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item.name}
