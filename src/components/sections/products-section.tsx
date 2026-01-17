@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Section, SectionHeader } from "@/components/ui/section";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { CardDark, CardHeader, CardTitleDark, CardDescriptionDark, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Animated } from "@/components/ui/animated";
@@ -12,8 +12,9 @@ const products = [
     id: 1,
     title: "Electric ATV",
     description: "Experience the thrill of off-road adventures with our electric ATVs. Built for power and agility, our vehicles offer an exhilarating ride through rugged terrains, delivering an unmatched outdoor experience.",
-    image: "/EonTrail.png",
+    image: "/Electric_ATV.png",
     badge: "Adventure",
+    badgeVariant: "power-solid" as const,
     features: ["Zero Emissions", "High Torque", "All-Terrain"],
     href: "/converted-atv",
   },
@@ -21,8 +22,9 @@ const products = [
     id: 2,
     title: "Enhanced Kango ZE",
     description: "Unlock the full potential of your electric vehicle with our advanced battery upgrade solutions. Elevate your vehicle's performance and range, ensuring a seamless and efficient driving experience.",
-    image: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?q=80&w=2072&auto=format&fit=crop",
+    image: "/KangoZE.jpg",
     badge: "Upgrade",
+    badgeVariant: "cloud-solid" as const,
     features: ["Extended Range", "Performance+", "Smart BMS"],
     href: "/kangoze-enhanced",
   },
@@ -30,8 +32,9 @@ const products = [
     id: 3,
     title: "Converted Bus & Vehicles",
     description: "Transform your internal combustion engine (ICE) vehicle into a sustainable and eco-friendly electric vehicle. Embrace the future of mobility while contributing to a cleaner and greener environment.",
-    image: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=2071&auto=format&fit=crop",
+    image: "/Converted_Bus.png",
     badge: "Conversion",
+    badgeVariant: "eco-solid" as const,
     features: ["Full Conversion", "Custom Design", "Eco-Friendly"],
     href: "/converted-vehicles",
   },
@@ -39,7 +42,7 @@ const products = [
 
 export function ProductsSection() {
   return (
-    <Section id="products" variant="gradient">
+    <Section id="products" variant="dark">
       <SectionHeader
         badge="What We Offer"
         title="Our Products & Services"
@@ -50,50 +53,51 @@ export function ProductsSection() {
         {products.map((product, index) => (
           <Animated
             key={product.id}
-            animation="flip-up"
-            delay={index * 180}
-            duration={1000}
-            distance={70}
+            animation="slide-up"
+            delay={index * 100}
+            duration={600}
+            distance={40}
           >
-            <Card className="group overflow-hidden h-full flex flex-col">
-              {/* Image Container */}
-              <div className="relative h-56 overflow-hidden">
-                <div
-                  className="absolute inset-0 bg-cover bg-center hover-zoom"
-                  style={{ backgroundImage: `url(${product.image})` }}
-                />
-                {/* Overlay with gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-500" />
-                
-                {/* Badge */}
-                <Badge variant="primary" className="absolute top-4 left-4 shadow-lg">
-                  {product.badge}
-                </Badge>
+            <CardDark className="group overflow-visible h-full flex flex-col relative mt-4 hover-lift">
+              {/* Badge - positioned to overlap top edge */}
+              <Badge 
+                variant={product.badgeVariant} 
+                className="absolute -top-3 left-6 z-10 px-4 py-1.5 shadow-sm"
+              >
+                {product.badge}
+              </Badge>
 
-                {/* Hover overlay effect */}
-                <div className="absolute inset-0 bg-gradient-to-t from-primary-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              {/* Image Container - Performance optimized */}
+              <div className="relative h-56 overflow-hidden rounded-t-xl">
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+                  style={{ 
+                    backgroundImage: `url(${product.image})`,
+                  }}
+                />
+                {/* Optimized overlay - less opacity change */}
+                <div className="absolute inset-0 bg-gradient-to-t from-navy-900/80 via-navy-900/20 to-transparent group-hover:from-navy-900/65 transition-[background-image] duration-200" />
               </div>
 
               <CardHeader className="relative">
-                <CardTitle className="text-2xl group-hover:text-primary-400 transition-colors duration-300">
+                <CardTitleDark className="text-2xl group-hover:text-amber-400 transition-colors duration-200">
                   {product.title}
-                </CardTitle>
-                {/* Subtle underline on hover */}
-                <div className="absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r from-primary-500/40 via-primary-500 to-primary-500/40 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+                </CardTitleDark>
+                {/* Refined underline */}
+                <div className="absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-amber-500/60 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center" />
               </CardHeader>
 
               <CardContent className="flex-grow">
-                <CardDescription className="text-base leading-relaxed mb-6">
+                <CardDescriptionDark className="text-base leading-relaxed mb-6">
                   {product.description}
-                </CardDescription>
+                </CardDescriptionDark>
 
-                {/* Features */}
+                {/* Features - Optimized transitions */}
                 <div className="flex flex-wrap gap-2">
-                  {product.features.map((feature, featureIndex) => (
+                  {product.features.map((feature) => (
                     <span
                       key={feature}
-                      className="px-3 py-1.5 text-xs font-medium bg-neutral-700/30 text-neutral-300 rounded-full border border-neutral-600/20 group-hover:border-primary-500/20 group-hover:bg-primary-500/5 transition-all duration-300"
-                      style={{ transitionDelay: `${featureIndex * 50}ms` }}
+                      className="px-3 py-1.5 text-xs font-semibold bg-navy-600/65 text-ice-100 rounded-full border border-ice-300/20 group-hover:border-amber-500/30 group-hover:bg-amber-500/12 transition-[background-color,border-color] duration-200"
                     >
                       {feature}
                     </span>
@@ -104,18 +108,18 @@ export function ProductsSection() {
               <CardFooter>
                 <Link href={product.href} className="w-full">
                   <Button 
-                    variant="secondary" 
+                    variant="ghost" 
                     size="md" 
-                    className="w-full hover-icon-shift"
+                    className="w-full hover-icon-shift press-effect"
                   >
                     <span>Learn More</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
                     </svg>
                   </Button>
                 </Link>
               </CardFooter>
-            </Card>
+            </CardDark>
           </Animated>
         ))}
       </div>

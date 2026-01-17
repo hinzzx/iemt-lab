@@ -34,13 +34,13 @@ const getAnimationStyles = (
   isVisible: boolean, 
   distance: number = 60
 ): CSSProperties => {
-  // Dynamic styles based on animation type and visibility
+  // Optimized: Use only GPU-accelerated properties (transform, opacity)
+  // Avoid filter (blur) for better performance
   const getTransform = (): CSSProperties => {
     if (isVisible) {
       return { 
         opacity: 1, 
-        transform: "translate3d(0, 0, 0) scale3d(1, 1, 1) rotate(0deg)",
-        filter: "blur(0px)"
+        transform: "translate3d(0, 0, 0) scale3d(1, 1, 1)",
       };
     }
 
@@ -68,38 +68,38 @@ const getAnimationStyles = (
       case "zoom-in":
         return { 
           opacity: 0, 
-          transform: "scale3d(0.85, 0.85, 1)",
+          transform: "scale3d(0.9, 0.9, 1)",
         };
       case "zoom-out":
         return { 
           opacity: 0, 
-          transform: "scale3d(1.15, 1.15, 1)",
+          transform: "scale3d(1.1, 1.1, 1)",
         };
       case "flip-up":
         return { 
           opacity: 0, 
-          transform: `perspective(1000px) rotateX(15deg) translate3d(0, ${distance}px, 0)`,
+          transform: `translate3d(0, ${distance * 0.7}px, 0) scale3d(0.95, 0.95, 1)`,
         };
       case "flip-left":
         return { 
           opacity: 0, 
-          transform: `perspective(1000px) rotateY(-15deg) translate3d(${distance}px, 0, 0)`,
+          transform: `translate3d(${distance * 0.7}px, 0, 0) scale3d(0.95, 0.95, 1)`,
         };
       case "rotate-in":
         return { 
           opacity: 0, 
-          transform: "rotate(-8deg) scale3d(0.9, 0.9, 1)",
+          transform: "scale3d(0.92, 0.92, 1)",
         };
       case "blur-in":
+        // Replaced blur with simple fade + slight movement for performance
         return { 
           opacity: 0, 
-          filter: "blur(12px)",
-          transform: `translate3d(0, ${distance / 2}px, 0)`,
+          transform: `translate3d(0, ${distance * 0.4}px, 0)`,
         };
       case "bounce-in":
         return { 
           opacity: 0, 
-          transform: `translate3d(0, ${distance}px, 0) scale3d(0.95, 0.95, 1)`,
+          transform: `translate3d(0, ${distance}px, 0) scale3d(0.96, 0.96, 1)`,
         };
       case "fade":
         return { opacity: 0 };
@@ -118,10 +118,10 @@ const Animated = forwardRef<HTMLDivElement, AnimatedProps>(
       children,
       animation = "slide-up",
       delay = 0,
-      duration = 900,
+      duration = 700,
       threshold = 0.05,
       triggerOnce = false,
-      distance = 60,
+      distance = 50,
       className,
       as: Component = "div",
       style,
@@ -137,14 +137,15 @@ const Animated = forwardRef<HTMLDivElement, AnimatedProps>(
 
     const animationStyles = getAnimationStyles(animation, isVisible, distance);
     
-    // Use separate transition properties to avoid React warning about mixing shorthand and non-shorthand
+    // Performance-optimized transitions using only GPU-accelerated properties
     const combinedStyle: CSSProperties = {
       ...animationStyles,
-      transitionProperty: "opacity, transform, filter",
+      transitionProperty: "opacity, transform",
       transitionDuration: `${duration}ms`,
-      transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+      transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)", // Smooth, premium easing
       transitionDelay: isVisible ? `${delay}ms` : "0ms",
-      willChange: isVisible ? "auto" : "opacity, transform",
+      // Only set willChange when animating, remove after
+      willChange: !isVisible ? "opacity, transform" : "auto",
       ...style,
     };
 
@@ -192,11 +193,11 @@ interface AnimatedGroupProps extends HTMLAttributes<HTMLDivElement> {
 function AnimatedGroup({
   children,
   animation = "slide-up",
-  staggerDelay = 120,
-  duration = 900,
+  staggerDelay = 100,
+  duration = 700,
   threshold = 0.05,
   triggerOnce = false,
-  distance = 60,
+  distance = 50,
   className,
   ...props
 }: AnimatedGroupProps) {
@@ -214,11 +215,11 @@ function AnimatedGroup({
             key={index}
             style={{
               ...animationStyles,
-              transitionProperty: "opacity, transform, filter",
+              transitionProperty: "opacity, transform",
               transitionDuration: `${duration}ms`,
               transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
               transitionDelay: isVisible ? `${index * staggerDelay}ms` : "0ms",
-              willChange: isVisible ? "auto" : "opacity, transform",
+              willChange: !isVisible ? "opacity, transform" : "auto",
             }}
           >
             {child}

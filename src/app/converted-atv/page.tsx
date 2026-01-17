@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -93,6 +94,8 @@ const conversionSteps = [
   },
 ];
 
+// Will be replaced with models from database in the future
+
 const models = [
   {
     name: "EonTrail",
@@ -106,8 +109,10 @@ const models = [
     price: "€3,093",
     priceBGN: "6,050 BGN",
     badge: "Popular",
+    badgeVariant: "cloud-solid" as const,
     featured: false,
     image: "/EonTrail.png",
+    storeUrl: "https://store.iemt-lab.com/products/eontrail-electric-atv",
   },
   {
     name: "HyperGlide",
@@ -121,8 +126,10 @@ const models = [
     price: "€6,243",
     priceBGN: "12,210 BGN",
     badge: "Best Value",
+    badgeVariant: "eco-solid" as const,
     featured: true,
     image: "/HyperGlide.png",
+    storeUrl: "https://store.iemt-lab.com/products/hyperglide-electric-atv",
   },
   {
     name: "TitanVolt",
@@ -136,66 +143,111 @@ const models = [
     price: "€9,243",
     priceBGN: "18,078 BGN",
     badge: "Premium",
+    badgeVariant: "secondary-solid" as const,
     featured: false,
     image: "/TitanVolt.png",
+    storeUrl: "https://store.iemt-lab.com/products/titanvolt-electric-atv",
   },
 ];
 
+// Core components with positions mapped to the image lines
+// Using percentage positions relative to the image (top/left from image bounds)
+// Image aspect ratio is approximately 1.18:1 (width:height)
 const coreComponents = [
-  { name: "ECU", description: "Electronic Control Unit" },
-  { name: "Battery", description: "High-density lithium-ion" },
-  { name: "Display", description: "Digital dashboard" },
-  { name: "Electric Motor", description: "Mid-drive BLDC motor" },
-  { name: "Charging Port", description: "Universal connector" },
+  { 
+    name: "Display", 
+    description: "Digital dashboard",
+    // Top line - at the top of handlebars
+    top: 6,
+    left: 2,
+  },
+  { 
+    name: "Charging Port", 
+    description: "Universal connector",
+    // Second line - upper right area
+    top: 6,
+    left: 68,
+  },
+  { 
+    name: "ECU", 
+    description: "Electronic Control Unit",
+    // Third line - middle left
+    top: 29,
+    left: 1,
+  },
+  { 
+    name: "Battery", 
+    description: "High-density lithium-ion",
+    // Fourth line - lower left
+    top: 44,
+    left: 1,
+  },
+  { 
+    name: "Electric Motor", 
+    description: "Mid-drive BLDC motor",
+    // Bottom line - bottom center-right
+    top: 86,
+    left: 58,
+  },
 ];
 
 export default function ConvertedATVPage() {
+  const [highlightedComponent, setHighlightedComponent] = useState<string | null>(null);
+
+  const handleComponentHighlight = (componentName: string) => {
+    setHighlightedComponent(componentName);
+    // Auto-clear highlight after 1 second
+    setTimeout(() => {
+      setHighlightedComponent(null);
+    }, 1000);
+  };
+
   return (
     <>
       <Header />
       <main>
         {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-navy-700">
           {/* Background */}
-          <div className="absolute inset-0 bg-neutral-950">
+          <div className="absolute inset-0 bg-navy-900">
             <div 
               className="absolute inset-0 bg-cover bg-center opacity-30"
               style={{ backgroundImage: "url('/HyperGlide.png')" }}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/40 via-neutral-950/60 to-neutral-950" />
+            <div className="absolute inset-0 bg-gradient-to-b from-navy-900/40 via-navy-700/60 to-navy-700" />
           </div>
           
           {/* Grid Pattern */}
           <div className="absolute inset-0 bg-grid-pattern opacity-20" />
           
-          {/* Gradient Accents */}
+          {/* Gradient Accents - Power orange for ATV context */}
           <div 
             className="absolute top-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-[180px] opacity-20 pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(0,136,230,0.6) 0%, transparent 70%)' }}
+            style={{ background: 'radial-gradient(circle, rgba(255, 107, 53, 0.6) 0%, transparent 70%)' }}
           />
           <div 
             className="absolute bottom-1/3 left-1/4 w-[400px] h-[400px] rounded-full blur-[150px] opacity-15 pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(240,140,0,0.5) 0%, transparent 70%)' }}
+            style={{ background: 'radial-gradient(circle, rgba(191, 139, 75, 0.5) 0%, transparent 70%)' }}
           />
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-32 text-center">
             <Animated animation="blur-in" duration={1000} distance={30} triggerOnce>
-              <Badge variant="secondary" className="mb-8">
+              <Badge variant="power-solid" className="mb-8">
                 Electric Conversion
               </Badge>
             </Animated>
 
             <Animated animation="slide-up" delay={150} duration={1200} distance={80} triggerOnce>
-              <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white tracking-tight leading-[1.1] mb-6">
+              <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold text-ice-100 uppercase tracking-widest leading-[1.1] mb-6">
                 From Fuel to Electric
               </h1>
             </Animated>
 
             <Animated animation="slide-up" delay={300} duration={1200} distance={60} triggerOnce>
-              <p className="text-xl md:text-2xl lg:text-3xl text-neutral-300 font-light mb-4">
+              <p className="text-xl md:text-2xl lg:text-3xl text-ice-300 font-light mb-4">
                 All the power, None of the noise.
               </p>
-              <p className="text-lg text-neutral-400 max-w-2xl mx-auto mb-12">
+              <p className="text-lg text-ice-400 max-w-2xl mx-auto mb-12">
                 Our mid-drive electric ATV conversion integrates advanced components into a seamless riding experience.
               </p>
             </Animated>
@@ -203,18 +255,18 @@ export default function ConvertedATVPage() {
             <Animated animation="zoom-in" delay={500} duration={1000} triggerOnce>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a href="#models">
-                  <Button variant="primary" size="xl" className="group animate-glow-slow hover-icon-shift">
+                  <Button variant="power" size="xl" className="group animate-glow-slow hover-icon-shift text-sm sm:text-base">
                     <span>Explore Models</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                     </svg>
                   </Button>
                 </a>
                 <a href="#how-it-works">
-                  <Button variant="ghost" size="xl" className="group hover-icon-shift">
+                  <Button variant="ghost" size="xl" className="group hover-icon-shift text-sm sm:text-base">
                     <span>See How It Works</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                   </Button>
                 </a>
@@ -223,7 +275,7 @@ export default function ConvertedATVPage() {
           </div>
 
           {/* Bottom Gradient Fade */}
-          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-neutral-950 via-neutral-950/80 to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-navy-700 via-navy-700/80 to-transparent pointer-events-none" />
         </section>
 
         {/* Features Section */}
@@ -244,14 +296,14 @@ export default function ConvertedATVPage() {
                 distance={50}
                 triggerOnce
               >
-                <div className="group p-6 rounded-2xl bg-neutral-800/20 border border-neutral-700/20 backdrop-blur-sm hover:bg-neutral-800/40 hover:border-primary-500/20 transition-all duration-500 hover-lift">
-                  <div className="inline-flex items-center justify-center w-12 h-12 mb-4 rounded-xl bg-gradient-to-br from-primary-500/15 to-secondary-500/5 text-primary-400 group-hover:scale-110 transition-transform duration-300">
+                <div className="group p-6 rounded-lg bg-navy-800/20 border border-navy-600/20 backdrop-blur-sm hover:bg-navy-800/40 hover:border-amber-500/20 transition-all duration-500 hover-lift">
+                  <div className="inline-flex items-center justify-center w-12 h-12 mb-4 rounded-lg bg-gradient-to-br from-power/15 to-amber-500/5 text-power group-hover:scale-110 transition-transform duration-300">
                     {feature.icon}
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2 group-hover:text-primary-400 transition-colors">
+                  <h3 className="text-lg font-semibold text-ice-100 mb-2 group-hover:text-amber-400 transition-colors">
                     {feature.title}
                   </h3>
-                  <p className="text-neutral-400 text-sm leading-relaxed">
+                  <p className="text-ice-400 text-sm leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -260,42 +312,139 @@ export default function ConvertedATVPage() {
           </div>
         </Section>
 
-        {/* Core Components Section */}
-        <Section variant="dark">
+        {/* Core Components Section - Interactive Image Map */}
+        <Section id="core-components" variant="dark">
           <SectionHeader
             badge="Technology"
             title="Core: Electric Power"
             subtitle="Every conversion is built around these essential components, engineered for reliability and performance."
           />
 
-          <div className="max-w-4xl mx-auto">
-            <Animated animation="zoom-in" duration={1000} triggerOnce>
-              <div className="relative p-8 md:p-12 rounded-3xl bg-gradient-to-br from-neutral-800/40 to-neutral-900/40 border border-neutral-700/30 backdrop-blur-sm">
-                {/* Central illustration placeholder */}
-                <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-                  {coreComponents.map((component, index) => (
+          <Animated animation="zoom-in" duration={1000} triggerOnce>
+            {/* Outer wrapper with extra padding to prevent label cutoff and scrollbars */}
+            <div className="flex justify-center px-8 py-4 md:px-10 md:py-6 lg:px-4 overflow-hidden">
+              {/* 
+                Interactive Image Container
+                Responsive sizing: smaller on mobile, larger on desktop
+                Image is the positioning context, labels use % positions
+              */}
+              <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl">
+                {/* ATV Image */}
+                <img 
+                  src="/Core_Components.png" 
+                  alt="Electric ATV Core Components"
+                  className="block w-full h-auto"
+                />
+                
+                {/* Component Labels - absolutely positioned over image */}
+                {coreComponents.map((component, index) => {
+                  const isHighlighted = highlightedComponent === component.name;
+                  return (
                     <Animated
                       key={component.name}
-                      animation="bounce-in"
-                      delay={index * 100}
+                      animation="zoom-in"
+                      delay={300 + index * 100}
                       duration={800}
                       triggerOnce
+                      className="absolute"
+                      style={{ 
+                        top: `${component.top}%`, 
+                        left: `${component.left}%`,
+                      }}
                     >
-                      <div className="flex flex-col items-center p-4 md:p-6 rounded-2xl bg-neutral-800/50 border border-neutral-700/30 hover:border-primary-500/30 hover:bg-neutral-800/70 transition-all duration-300 group">
-                        <div className="w-16 h-16 md:w-20 md:h-20 mb-3 rounded-xl bg-gradient-to-br from-primary-500/20 to-secondary-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                          <svg className="w-8 h-8 md:w-10 md:h-10 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                          </svg>
+                      <div className="group cursor-pointer">
+                        <div className={`
+                          flex items-center gap-1.5 sm:gap-2
+                          px-2 py-1 sm:px-3 sm:py-1.5 md:px-3.5 md:py-2
+                          rounded-md
+                          backdrop-blur-md
+                          shadow-lg
+                          transition-all duration-300
+                          hover:bg-navy-800 hover:border-amber-400 
+                          md:hover:scale-105
+                          whitespace-nowrap
+                          ${isHighlighted 
+                            ? 'bg-amber-500/95 border-2 border-amber-300 shadow-2xl shadow-amber-500/60 scale-110' 
+                            : 'bg-navy-900/95 border border-amber-500/50 shadow-black/40 hover:shadow-xl hover:shadow-amber-500/25'
+                          }
+                        `}>
+                          {/* Icon */}
+                          <div className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded flex items-center justify-center flex-shrink-0 transition-colors duration-300 ${
+                            isHighlighted 
+                              ? 'bg-white/30' 
+                              : 'bg-gradient-to-br from-amber-500/30 to-power/20'
+                          }`}>
+                            <svg className={`w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 transition-colors duration-300 ${
+                              isHighlighted ? 'text-white' : 'text-amber-400'
+                            }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                          </div>
+                          {/* Text */}
+                          <div className="flex flex-col">
+                            <span className={`font-semibold text-[10px] sm:text-[11px] md:text-xs leading-tight transition-colors duration-300 ${
+                              isHighlighted ? 'text-white' : 'text-ice-100'
+                            }`}>
+                              {component.name}
+                            </span>
+                            <span className={`text-[8px] sm:text-[9px] md:text-[10px] leading-tight hidden sm:block transition-colors duration-300 ${
+                              isHighlighted ? 'text-white/90' : 'text-ice-400'
+                            }`}>
+                              {component.description}
+                            </span>
+                          </div>
                         </div>
-                        <span className="text-white font-semibold text-sm md:text-base">{component.name}</span>
-                        <span className="text-neutral-500 text-xs mt-1">{component.description}</span>
                       </div>
                     </Animated>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-            </Animated>
-          </div>
+            </div>
+
+            {/* Mobile: Component List (for very small screens) - Tap to highlight */}
+            <div className="mt-6 px-4 sm:hidden">
+              <p className="text-center text-ice-400 text-xs mb-3">Tap a component to highlight it on the image</p>
+              <div className="grid grid-cols-2 gap-2 max-w-md mx-auto">
+                {coreComponents.map((component) => {
+                  const isHighlighted = highlightedComponent === component.name;
+                  return (
+                    <button
+                      key={`mobile-${component.name}`}
+                      onClick={() => handleComponentHighlight(component.name)}
+                      className={`
+                        flex items-center gap-2 p-2.5 rounded-lg
+                        transition-all duration-300 active:scale-95
+                        ${isHighlighted 
+                          ? 'bg-amber-500/90 border-2 border-amber-300 shadow-lg shadow-amber-500/30' 
+                          : 'bg-navy-800/50 border border-navy-600/30 hover:bg-navy-800/70 hover:border-amber-500/30'
+                        }
+                      `}
+                    >
+                      <div className={`w-7 h-7 rounded flex items-center justify-center flex-shrink-0 transition-colors duration-300 ${
+                        isHighlighted 
+                          ? 'bg-white/30' 
+                          : 'bg-gradient-to-br from-power/30 to-amber-500/20'
+                      }`}>
+                        <svg className={`w-3.5 h-3.5 transition-colors duration-300 ${
+                          isHighlighted ? 'text-white' : 'text-amber-400'
+                        }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      </div>
+                      <div className="text-left">
+                        <span className={`font-semibold text-[10px] block transition-colors duration-300 ${
+                          isHighlighted ? 'text-white' : 'text-ice-100'
+                        }`}>{component.name}</span>
+                        <span className={`text-[8px] transition-colors duration-300 ${
+                          isHighlighted ? 'text-white/90' : 'text-ice-500'
+                        }`}>{component.description}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </Animated>
         </Section>
 
         {/* How It Works Section */}
@@ -310,7 +459,7 @@ export default function ConvertedATVPage() {
             {/* Desktop Layout */}
             <div className="hidden md:block relative">
               {/* Connector line - full width behind all steps */}
-              <div className="absolute top-12 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-primary-500/20 via-primary-500/40 to-primary-500/20" />
+              <div className="absolute top-12 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-amber-500/20 via-amber-500/40 to-amber-500/20" />
               
               <div className="grid grid-cols-5 gap-4">
                 {conversionSteps.map((step, index) => (
@@ -325,18 +474,18 @@ export default function ConvertedATVPage() {
                     <div className="relative group flex flex-col items-center text-center">
                       {/* Step number circle */}
                       <div className="relative z-10 mb-6">
-                        <div className="w-24 h-24 rounded-2xl bg-neutral-900 border-2 border-neutral-700/60 flex items-center justify-center group-hover:border-primary-500/60 group-hover:bg-neutral-900/80 transition-all duration-500 shadow-lg shadow-neutral-950/50">
-                          <span className="text-3xl font-bold text-gradient">{step.step}</span>
+                        <div className="w-24 h-24 rounded-xl bg-navy-900 border-2 border-navy-600/60 flex items-center justify-center group-hover:border-amber-500/60 group-hover:bg-navy-900/80 transition-all duration-500 shadow-lg shadow-navy-900/50">
+                          <span className="text-3xl font-bold text-gradient font-mono">{step.step}</span>
                         </div>
                         {/* Glow effect on hover */}
-                        <div className="absolute inset-0 rounded-2xl bg-primary-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+                        <div className="absolute inset-0 rounded-xl bg-amber-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
                       </div>
                       
                       {/* Content */}
-                      <h3 className="text-sm font-bold text-white mb-2 group-hover:text-primary-400 transition-colors leading-tight min-h-[40px] flex items-center">
+                      <h3 className="text-sm font-semibold text-ice-100 mb-2 group-hover:text-amber-400 transition-colors leading-tight min-h-[40px] flex items-center">
                         {step.title}
                       </h3>
-                      <p className="text-neutral-500 text-xs leading-relaxed">
+                      <p className="text-ice-500 text-xs leading-relaxed">
                         {step.description}
                       </p>
                     </div>
@@ -348,7 +497,7 @@ export default function ConvertedATVPage() {
             {/* Mobile Layout - Vertical timeline */}
             <div className="md:hidden relative">
               {/* Vertical connector line */}
-              <div className="absolute left-8 top-12 bottom-12 w-0.5 bg-gradient-to-b from-primary-500/40 via-primary-500/20 to-primary-500/40" />
+              <div className="absolute left-8 top-12 bottom-12 w-0.5 bg-gradient-to-b from-amber-500/40 via-amber-500/20 to-amber-500/40" />
               
               <div className="space-y-8">
                 {conversionSteps.map((step, index) => (
@@ -363,17 +512,17 @@ export default function ConvertedATVPage() {
                     <div className="relative flex items-start gap-6 group">
                       {/* Step number */}
                       <div className="relative z-10 flex-shrink-0">
-                        <div className="w-16 h-16 rounded-xl bg-neutral-900 border-2 border-neutral-700/60 flex items-center justify-center group-hover:border-primary-500/60 transition-all duration-300 shadow-lg">
-                          <span className="text-xl font-bold text-gradient">{step.step}</span>
+                        <div className="w-16 h-16 rounded-lg bg-navy-900 border-2 border-navy-600/60 flex items-center justify-center group-hover:border-amber-500/60 transition-all duration-300 shadow-lg">
+                          <span className="text-xl font-bold text-gradient font-mono">{step.step}</span>
                         </div>
                       </div>
                       
                       {/* Content */}
                       <div className="pt-2">
-                        <h3 className="text-base font-bold text-white mb-1 group-hover:text-primary-400 transition-colors">
+                        <h3 className="text-base font-semibold text-ice-100 mb-1 group-hover:text-amber-400 transition-colors">
                           {step.title}
                         </h3>
-                        <p className="text-neutral-500 text-sm leading-relaxed">
+                        <p className="text-ice-500 text-sm leading-relaxed">
                           {step.description}
                         </p>
                       </div>
@@ -403,91 +552,92 @@ export default function ConvertedATVPage() {
                 distance={70}
                 triggerOnce
               >
-                <div className={`relative group rounded-3xl overflow-hidden transition-all duration-500 hover-lift ${
+                <div className={`relative group rounded-2xl overflow-visible transition-all duration-500 hover-lift mt-4 ${
                   model.featured 
-                    ? 'bg-gradient-to-b from-primary-500/10 via-neutral-800/50 to-neutral-900/50 border-2 border-primary-500/30' 
-                    : 'bg-neutral-800/30 border border-neutral-700/30 hover:border-primary-500/20'
+                    ? 'bg-gradient-to-b from-amber-500/10 via-navy-800/50 to-navy-900/50 border-2 border-amber-500/30' 
+                    : 'bg-navy-800/30 border border-navy-600/30 hover:border-amber-500/20'
                 }`}>
-                  {/* Badge */}
-                  <div className="absolute top-4 right-4 z-10">
-                    <Badge variant={model.featured ? "primary" : "secondary"}>
+                  {/* Badge - positioned halfway through top */}
+                  <Badge 
+                    variant={model.badgeVariant}
+                    className="absolute -top-3 right-6 z-10 px-4 py-1.5"
+                  >
                       {model.badge}
                     </Badge>
-                  </div>
 
                   {/* Image */}
-                  <div className="relative h-48 overflow-hidden">
+                  <div className="relative h-48 overflow-hidden rounded-t-2xl">
                     <div 
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                      className="absolute inset-0 bg-center bg-no-repeat bg-[length:70%] md:bg-cover transition-transform duration-700 group-hover:scale-110"
                       style={{ backgroundImage: `url(${model.image})` }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy-900 via-navy-900/40 to-transparent" />
                   </div>
 
                   {/* Content */}
                   <div className="p-6">
                     <div className="mb-4">
-                      <h3 className="text-2xl font-bold text-white group-hover:text-primary-400 transition-colors">
+                      <h3 className="text-2xl font-semibold text-ice-100 group-hover:text-amber-400 transition-colors">
                         {model.name}
                       </h3>
-                      <p className="text-primary-400 text-sm font-medium">{model.tagline}</p>
+                      <p className="text-amber-400 text-sm font-medium">{model.tagline}</p>
                     </div>
 
-                    <p className="text-neutral-400 text-sm leading-relaxed mb-6">
+                    <p className="text-ice-400 text-sm leading-relaxed mb-6">
                       {model.description}
                     </p>
 
-                    {/* Specs */}
-                    <div className="space-y-3 mb-6 p-4 rounded-xl bg-neutral-900/50 border border-neutral-800/50">
+                    {/* Specs - Using monospace per spec */}
+                    <div className="space-y-3 mb-6 p-4 rounded-lg bg-navy-900/50 border border-navy-700/50">
                       <div className="flex justify-between items-center">
-                        <span className="text-neutral-500 text-sm">Battery</span>
-                        <span className="text-white font-mono font-medium">{model.specs.battery}</span>
+                        <span className="text-ice-500 text-sm">Battery</span>
+                        <span className="text-ice-100 font-mono font-medium">{model.specs.battery}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-neutral-500 text-sm">Power</span>
-                        <span className="text-white font-mono font-medium">{model.specs.power}</span>
+                        <span className="text-ice-500 text-sm">Power</span>
+                        <span className="text-ice-100 font-mono font-medium">{model.specs.power}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-neutral-500 text-sm">Range</span>
-                        <span className="text-white font-mono font-medium">{model.specs.range}</span>
+                        <span className="text-ice-500 text-sm">Range</span>
+                        <span className="text-ice-100 font-mono font-medium">{model.specs.range}</span>
                       </div>
                     </div>
 
-                    {/* Price */}
+                    {/* Price - Monospace for prices per spec */}
                     <div className="mb-6">
-                      <div className="text-sm text-neutral-500 mb-1">Starting price</div>
+                      <div className="text-sm text-ice-500 mb-1">Starting price</div>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-bold text-gradient">{model.price}</span>
-                        <span className="text-neutral-500 text-sm">/ {model.priceBGN}</span>
+                        <span className="text-3xl font-bold text-gradient font-mono">{model.price}</span>
+                        <span className="text-ice-500 text-sm font-mono">/ {model.priceBGN}</span>
                       </div>
                     </div>
 
                     {/* CTA */}
                     <div className="space-y-3 flex flex-col">
-                      <a href="https://www.iemt-lab.com/store" target="_blank" rel="noopener noreferrer">
+                      <a href="https://store.iemt-lab.com" target="_blank" rel="noopener noreferrer">
                         <Button 
-                          variant={model.featured ? "primary" : "secondary"} 
+                          variant={model.featured ? "secondary" : "power"} 
                           size="lg" 
-                          className="w-full hover-icon-shift"
+                          className="w-full hover-icon-shift text-sm sm:text-base"
                         >
                           <span>Shop Now</span>
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                           </svg>
                         </Button>
                       </a>
-                      <Link href="/configurator">
+                      <a href={model.storeUrl} target="_blank" rel="noopener noreferrer">
                         <Button 
                           variant="ghost" 
                           size="lg" 
-                          className="w-full hover-icon-shift"
+                          className="w-full hover-icon-shift text-sm sm:text-base"
                         >
                           <span>Configure Your ATV</span>
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                           </svg>
                         </Button>
-                      </Link>
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -500,10 +650,10 @@ export default function ConvertedATVPage() {
         <Section variant="gradient">
           <div className="text-center max-w-3xl mx-auto">
             <Animated animation="slide-up" duration={1000} triggerOnce>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-ice-100 uppercase tracking-wider mb-6">
                 Ready to Go Electric?
               </h2>
-              <p className="text-lg text-neutral-400 mb-10">
+              <p className="text-lg text-ice-400 mb-10">
                 Contact us today for a custom quote on your ATV conversion. Our team will guide you through every step of the process.
               </p>
             </Animated>
@@ -511,18 +661,18 @@ export default function ConvertedATVPage() {
             <Animated animation="zoom-in" delay={200} duration={900} triggerOnce>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/#contact">
-                  <Button variant="primary" size="xl" className="hover-icon-shift animate-glow-slow">
+                  <Button variant="secondary" size="xl" className="hover-icon-shift animate-glow-slow text-sm sm:text-base">
                     <span>Get a Quote</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                   </Button>
                 </Link>
                 <Link href="/">
-                  <Button variant="ghost" size="xl" className="hover-icon-shift">
+                  <Button variant="ghost" size="xl" className="hover-icon-shift text-sm sm:text-base">
                     <span>Back to Home</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                   </Button>
                 </Link>
@@ -535,4 +685,3 @@ export default function ConvertedATVPage() {
     </>
   );
 }
-

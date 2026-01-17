@@ -15,7 +15,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={id}
-            className="block text-sm font-medium text-neutral-300 mb-2.5 transition-colors duration-200 group-focus-within:text-primary-400"
+            className="block text-sm font-medium text-ice-300 mb-2.5 transition-colors duration-200 group-focus-within:text-amber-400"
           >
             {label}
           </label>
@@ -25,22 +25,22 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             type={type}
             id={id}
             className={cn(
-              "flex h-12 w-full rounded-xl border border-neutral-700/60 bg-neutral-800/40 px-4 py-3 text-base text-white placeholder:text-neutral-500",
-              "transition-all duration-300 ease-out",
-              "focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-500/10",
-              "hover:border-neutral-600 hover:bg-neutral-800/60",
+              // Spec: white bg, default border, md radius, body font
+              "flex h-12 w-full rounded border border-navy-600/50 bg-navy-800/40 px-4 py-3 text-base text-ice-100 placeholder:text-ice-500",
+              "transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
+              // Focus: amber border (--color-border-focus), amber outline
+              "focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20",
+              "hover:border-navy-500 hover:bg-navy-800/60",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              error && "border-red-500/60 focus:border-red-500 focus:ring-red-500/10",
+              error && "border-error/60 focus:border-error focus:ring-error/20",
               className
             )}
             ref={ref}
             {...props}
           />
-          {/* Focus glow effect */}
-          <div className="absolute inset-0 rounded-xl bg-primary-500/5 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none" />
         </div>
         {error && (
-          <p className="mt-2.5 text-sm text-red-400 animate-reveal-up">{error}</p>
+          <p className="mt-2.5 text-sm text-error">{error}</p>
         )}
       </div>
     );

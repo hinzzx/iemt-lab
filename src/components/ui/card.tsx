@@ -8,11 +8,12 @@ const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
     <div
       ref={ref}
       className={cn(
-        "relative rounded-2xl border border-neutral-700/40 bg-neutral-800/40 backdrop-blur-md overflow-hidden",
-        "transition-all duration-500 ease-out",
-        "hover:border-neutral-600/60 hover:bg-neutral-800/60",
-        "hover:shadow-2xl hover:shadow-neutral-950/50",
-        "hover:-translate-y-1",
+        // Spec: Cards use white bg, default border, lg radius, md shadow
+        "relative rounded-lg border border-ice-200 bg-white overflow-hidden",
+        "shadow-md",
+        "transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]",
+        // Hover: lg shadow, strong border
+        "hover:border-ice-400 hover:shadow-lg",
         "group",
         className
       )}
@@ -21,6 +22,32 @@ const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   )
 );
 Card.displayName = "Card";
+
+// For dark theme cards (on navy backgrounds) — Premium surface treatment
+const CardDark = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        // Solid premium surface - NO backdrop-blur for performance
+        "relative rounded-xl bg-navy-700/85 overflow-hidden",
+        // Refined border
+        "border border-ice-300/20",
+        // Subtle inner highlight
+        "shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
+        "shadow-lg shadow-navy-900/30",
+        "transition-[background-color,border-color,box-shadow] duration-200 ease-out",
+        // Hover: subtle enhancement
+        "hover:bg-navy-700/95 hover:border-ice-300/30",
+        "hover:shadow-xl hover:shadow-navy-900/40",
+        "group",
+        className
+      )}
+      {...props}
+    />
+  )
+);
+CardDark.displayName = "CardDark";
 
 const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
@@ -38,8 +65,9 @@ const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingEleme
     <h3
       ref={ref}
       className={cn(
-        "text-xl font-bold leading-tight tracking-tight text-white",
-        "transition-colors duration-300",
+        // H3 spec: Montserrat SemiBold, Title Case (handled by content), leading-tight
+        "text-xl font-semibold leading-tight tracking-tight text-navy-700",
+        "transition-colors duration-200",
         className
       )}
       {...props}
@@ -48,13 +76,29 @@ const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingEleme
 );
 CardTitle.displayName = "CardTitle";
 
+// Dark variant title for navy backgrounds
+const CardTitleDark = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingElement>>(
+  ({ className, ...props }, ref) => (
+    <h3
+      ref={ref}
+      className={cn(
+        "text-xl font-semibold leading-tight tracking-tight text-ice-100",
+        "transition-colors duration-200",
+        className
+      )}
+      {...props}
+    />
+  )
+);
+CardTitleDark.displayName = "CardTitleDark";
+
 const CardDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLParagraphElement>>(
   ({ className, ...props }, ref) => (
     <p
       ref={ref}
       className={cn(
-        "text-sm text-neutral-400 leading-relaxed",
-        "transition-colors duration-300 group-hover:text-neutral-300",
+        "text-sm text-navy-400 leading-relaxed",
+        "transition-colors duration-200 group-hover:text-navy-500",
         className
       )}
       {...props}
@@ -62,6 +106,22 @@ const CardDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPara
   )
 );
 CardDescription.displayName = "CardDescription";
+
+// Dark variant description
+const CardDescriptionDark = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLParagraphElement>>(
+  ({ className, ...props }, ref) => (
+    <p
+      ref={ref}
+      className={cn(
+        "text-sm text-ice-400 leading-relaxed",
+        "transition-colors duration-200 group-hover:text-ice-300",
+        className
+      )}
+      {...props}
+    />
+  )
+);
+CardDescriptionDark.displayName = "CardDescriptionDark";
 
 const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
@@ -81,4 +141,14 @@ const CardFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 );
 CardFooter.displayName = "CardFooter";
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+export { 
+  Card, 
+  CardDark,
+  CardHeader, 
+  CardFooter, 
+  CardTitle, 
+  CardTitleDark,
+  CardDescription, 
+  CardDescriptionDark,
+  CardContent 
+};

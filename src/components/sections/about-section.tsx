@@ -62,52 +62,51 @@ export function AboutSection() {
           <Animated
             key={item.id}
             animation="slide-up"
-            delay={index * 150}
-            duration={1000}
-            distance={70}
+            delay={index * 100}
+            duration={700}
+            distance={50}
           >
-            <div className="group relative p-8 rounded-2xl bg-neutral-800/15 border border-neutral-700/15 backdrop-blur-sm transition-all duration-500 hover:bg-neutral-800/30 hover:border-primary-500/20 hover-lift h-full">
-              {/* Icon */}
-              <Animated animation="zoom-in" delay={index * 150 + 200} duration={800}>
-                <div className="inline-flex items-center justify-center w-14 h-14 mb-6 rounded-xl bg-gradient-to-br from-primary-500/15 to-secondary-500/5 text-primary-400 group-hover:scale-105 group-hover:from-primary-500/25 transition-all duration-400">
-                  {item.icon}
-                </div>
-              </Animated>
+            <div className="group relative p-8 rounded-xl bg-navy-700/65 border border-ice-300/20 transition-[background-color,border-color] duration-200 hover:bg-navy-700/80 hover:border-ice-300/30 hover-lift h-full shadow-lg shadow-navy-900/30">
+              {/* Icon - Performance optimized */}
+              <div className="inline-flex items-center justify-center w-14 h-14 mb-6 rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-500/5 border border-amber-500/20 text-amber-400 group-hover:scale-105 group-hover:from-amber-500/25 group-hover:border-amber-500/30 transition-[transform,background-image,border-color] duration-200">
+                {item.icon}
+              </div>
 
-              {/* Title */}
-              <h3 className="text-xl font-bold text-white mb-4 tracking-tight group-hover:text-primary-400 transition-colors duration-300">
+              {/* Title - Snappier */}
+              <h3 className="text-xl font-semibold text-ice-100 mb-4 tracking-tight group-hover:text-amber-400 transition-colors duration-200">
                 {item.title}
               </h3>
 
               {/* Description */}
-              <p className="text-neutral-400 leading-relaxed group-hover:text-neutral-300 transition-colors duration-300">
+              <p className="text-ice-400 leading-relaxed group-hover:text-ice-300 transition-colors duration-200">
                 {item.description}
               </p>
 
-              {/* Decorative line */}
-              <div className="absolute bottom-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-primary-500/30 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+              {/* Refined decorative line */}
+              <div className="absolute bottom-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center" />
             </div>
           </Animated>
         ))}
       </div>
 
-      {/* Stats */}
+      {/* Stats - Refined */}
       <div className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-16">
         {stats.map((stat, index) => (
           <Animated
             key={stat.label}
-            animation="bounce-in"
-            delay={index * 120}
-            duration={1000}
-            distance={50}
+            animation="fade"
+            delay={index * 80}
+            duration={600}
+            distance={30}
           >
             <div className="text-center group">
               <div className="relative inline-block">
-                <div className="text-4xl md:text-5xl lg:text-6xl font-bold text-gradient mb-3 group-hover:scale-105 transition-transform duration-300">
+                {/* Technical data uses monospace per spec */}
+                <div className="text-4xl md:text-5xl lg:text-6xl font-bold text-gradient mb-3 group-hover:scale-105 transition-transform duration-200 font-mono">
                   {stat.value}
                 </div>
               </div>
-              <div className="text-sm text-neutral-400 uppercase tracking-[0.15em] group-hover:text-neutral-300 transition-colors duration-300">
+              <div className="text-sm text-ice-400 uppercase tracking-[0.15em] group-hover:text-ice-300 transition-colors duration-200">
                 {stat.label}
               </div>
             </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Animated } from "@/components/ui/animated";
 
 const footerLinks = {
@@ -52,27 +53,26 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="relative bg-neutral-950 border-t border-neutral-800/40 overflow-hidden">
+    <footer className="relative bg-navy-900 border-t border-navy-700/40 overflow-hidden">
       {/* Subtle background accents */}
-      <div className="absolute top-0 left-1/4 w-80 h-80 bg-primary-500/3 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-60 h-60 bg-secondary-500/3 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-80 h-80 bg-amber-500/3 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-60 h-60 bg-ice-400/3 rounded-full blur-[120px] pointer-events-none" />
       
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
           {/* Brand Column */}
           <Animated animation="slide-up" duration={1000} distance={50} className="lg:col-span-1">
             <a href="#home" className="flex items-center gap-3 mb-6 group">
-              <div className="relative w-10 h-10 flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl transform rotate-6 group-hover:rotate-12 transition-transform duration-400" />
-                <div className="relative bg-neutral-950 rounded-xl w-9 h-9 flex items-center justify-center">
-                  <span className="text-lg font-bold bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">iE</span>
-                </div>
+              <div className="relative h-12 w-[160px] flex items-center">
+                <Image
+                  src="/logos/full_transparent.svg"
+                  alt="iEMT Lab"
+                  fill
+                  className="transition-opacity duration-300 group-hover:opacity-80 object-contain object-left"
+                />
               </div>
-              <span className="text-xl font-bold text-white tracking-tight">
-                iEMT Lab
-              </span>
             </a>
-            <p className="text-neutral-400 text-sm leading-relaxed mb-8 max-w-xs">
+            <p className="text-ice-300 text-sm leading-relaxed mb-8 max-w-xs">
               Advancing Tomorrow: Innovating Electric Motors for a Transformative Experience.
             </p>
             <div className="flex gap-3">
@@ -80,7 +80,7 @@ export function Footer() {
                 <Animated key={social.name} animation="zoom-in" delay={index * 100} duration={600}>
                   <a
                     href={social.href}
-                    className="w-11 h-11 rounded-xl bg-neutral-800/40 border border-neutral-700/40 flex items-center justify-center text-neutral-400 hover:bg-primary-500 hover:border-primary-500 hover:text-white transition-all duration-300 hover:scale-105"
+                    className="w-11 h-11 rounded-lg bg-navy-700/80 border border-ice-300/20 flex items-center justify-center text-ice-300 hover:bg-amber-500 hover:border-amber-500 hover:text-navy-900 transition-[background-color,border-color,color,transform] duration-200 hover:scale-105 shadow-md shadow-navy-900/30"
                     aria-label={social.name}
                   >
                     {social.icon}
@@ -92,7 +92,7 @@ export function Footer() {
 
           {/* Navigation Links */}
           <Animated animation="slide-up" delay={120} duration={1000} distance={50}>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-[0.15em] mb-5">
+            <h4 className="text-sm font-semibold text-ice-100 uppercase tracking-[0.15em] mb-5">
               Navigation
             </h4>
             <ul className="space-y-3">
@@ -100,7 +100,7 @@ export function Footer() {
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-neutral-400 hover:text-white transition-colors duration-300 text-sm inline-block hover:translate-x-1 transition-transform"
+                    className="text-ice-300 hover:text-ice-100 transition-colors duration-300 text-sm inline-block hover:translate-x-1 transition-transform"
                     style={{ transitionDelay: `${index * 30}ms` }}
                   >
                     {link.name}
@@ -112,7 +112,7 @@ export function Footer() {
 
           {/* Products */}
           <Animated animation="slide-up" delay={240} duration={1000} distance={50}>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-[0.15em] mb-5">
+            <h4 className="text-sm font-semibold text-ice-100 uppercase tracking-[0.15em] mb-5">
               Our Products
             </h4>
             <ul className="space-y-3">
@@ -120,7 +120,7 @@ export function Footer() {
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-neutral-400 hover:text-white transition-colors duration-300 text-sm inline-block hover:translate-x-1 transition-transform"
+                    className="text-ice-300 hover:text-ice-100 transition-colors duration-300 text-sm inline-block hover:translate-x-1 transition-transform"
                     style={{ transitionDelay: `${index * 30}ms` }}
                   >
                     {link.name}
@@ -132,38 +132,38 @@ export function Footer() {
 
           {/* Contact Info */}
           <Animated animation="slide-up" delay={360} duration={1000} distance={50}>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-[0.15em] mb-5">
+            <h4 className="text-sm font-semibold text-ice-100 uppercase tracking-[0.15em] mb-5">
               Contact Us
             </h4>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 group">
-                <div className="w-9 h-9 rounded-lg bg-neutral-800/40 flex items-center justify-center text-primary-400 flex-shrink-0 group-hover:bg-primary-500/15 transition-colors duration-300">
+                <div className="w-9 h-9 rounded-lg bg-navy-700/80 border border-ice-300/20 flex items-center justify-center text-amber-400 flex-shrink-0 group-hover:bg-amber-500/20 group-hover:border-amber-500/30 transition-[background-color,border-color] duration-200 shadow-sm shadow-navy-900/20">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <span className="text-neutral-400 text-sm pt-2">
+                <span className="text-ice-300 text-sm pt-2">
                   Karlovo, Bulgaria
                 </span>
               </li>
               <li className="flex items-start gap-3 group">
-                <div className="w-9 h-9 rounded-lg bg-neutral-800/40 flex items-center justify-center text-primary-400 flex-shrink-0 group-hover:bg-primary-500/15 transition-colors duration-300">
+                <div className="w-9 h-9 rounded-lg bg-navy-700/80 border border-ice-300/20 flex items-center justify-center text-amber-400 flex-shrink-0 group-hover:bg-amber-500/20 group-hover:border-amber-500/30 transition-[background-color,border-color] duration-200 shadow-sm shadow-navy-900/20">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                 </div>
-                <a href="tel:+359893542287" className="text-neutral-400 hover:text-white transition-colors text-sm pt-2">
+                <a href="tel:+359893542287" className="text-ice-300 hover:text-ice-100 transition-colors text-sm pt-2">
                   +359 89 354 2287
                 </a>
               </li>
               <li className="flex items-start gap-3 group">
-                <div className="w-9 h-9 rounded-lg bg-neutral-800/40 flex items-center justify-center text-primary-400 flex-shrink-0 group-hover:bg-primary-500/15 transition-colors duration-300">
+                <div className="w-9 h-9 rounded-lg bg-navy-700/80 border border-ice-300/20 flex items-center justify-center text-amber-400 flex-shrink-0 group-hover:bg-amber-500/20 group-hover:border-amber-500/30 transition-[background-color,border-color] duration-200 shadow-sm shadow-navy-900/20">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <a href="mailto:contact@iemt-lab.com" className="text-neutral-400 hover:text-white transition-colors text-sm pt-2">
+                <a href="mailto:contact@iemt-lab.com" className="text-ice-300 hover:text-ice-100 transition-colors text-sm pt-2">
                   contact@iemt-lab.com
                 </a>
               </li>
@@ -173,8 +173,8 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <Animated animation="slide-up" delay={450} duration={900} distance={30}>
-          <div className="mt-16 pt-8 border-t border-neutral-800/40 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-neutral-500 text-sm">
+          <div className="mt-16 pt-8 border-t border-navy-700/40 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-ice-400 text-sm">
               © 2026 iEMT Lab. All rights reserved.
             </p>
             <div className="flex gap-8">
@@ -182,7 +182,7 @@ export function Footer() {
                 <a
                   key={link.name}
                   href={link.href}
-                  className="text-neutral-500 hover:text-white transition-colors text-sm"
+                  className="text-ice-400 hover:text-ice-100 transition-colors text-sm"
                 >
                   {link.name}
                 </a>

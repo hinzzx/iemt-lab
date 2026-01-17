@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { DM_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Montserrat, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
-const ibmPlexMono = IBM_Plex_Mono({
-  variable: "--font-ibm-plex-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
   weight: ["400", "500"],
   display: "swap",
@@ -37,8 +37,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
       <body
-        className={`${dmSans.variable} ${ibmPlexMono.variable} font-sans antialiased`}
-        style={{ fontFamily: "var(--font-dm-sans), system-ui, sans-serif" }}
+        className={`${montserrat.variable} ${jetbrainsMono.variable} antialiased`}
+        style={{ fontFamily: "var(--font-montserrat), system-ui, sans-serif" }}
       >
         {children}
       </body>

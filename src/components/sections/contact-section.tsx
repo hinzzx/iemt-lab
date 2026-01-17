@@ -67,124 +67,110 @@ export function ContactSection() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-        {/* Contact Form */}
-        <Animated animation="slide-right" duration={1000} distance={80} className="order-2 lg:order-1">
-          <div className="relative bg-neutral-800/15 border border-neutral-700/20 rounded-2xl p-8 backdrop-blur-sm overflow-hidden">
-            {/* Decorative corner gradient */}
-            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-primary-500/5 to-transparent rounded-bl-full pointer-events-none" />
+        {/* Contact Form - Optimized */}
+        <Animated animation="slide-up" duration={700} distance={50} className="order-2 lg:order-1">
+          <div className="relative bg-navy-700/65 border border-ice-300/20 rounded-xl p-8 overflow-hidden shadow-lg shadow-navy-900/30">
+            {/* Subtle corner accent */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-500/[0.03] to-transparent rounded-bl-full pointer-events-none" />
             
             {isSubmitted ? (
-              <Animated animation="zoom-in" duration={600}>
+              <Animated animation="fade" duration={400}>
                 <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="w-20 h-20 mb-8 rounded-full bg-gradient-to-br from-green-500/15 to-green-500/5 flex items-center justify-center">
-                    <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-20 h-20 mb-8 rounded-full bg-gradient-to-br from-eco/20 to-eco/5 flex items-center justify-center">
+                    <svg className="w-10 h-10 text-eco" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">Message Sent!</h3>
-                  <p className="text-neutral-400 max-w-sm">Thanks for reaching out. We&apos;ll get back to you as soon as possible.</p>
+                  <h3 className="text-2xl font-bold text-ice-100 mb-3">Message Sent!</h3>
+                  <p className="text-ice-400 max-w-sm">Thanks for reaching out. We&apos;ll get back to you as soon as possible.</p>
                 </div>
               </Animated>
             ) : (
               <form onSubmit={handleSubmit} className="relative space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <Animated animation="slide-up" delay={100} duration={800} distance={40}>
-                    <Input
-                      id="firstName"
-                      label="First Name"
-                      placeholder="John"
-                      required
-                    />
-                  </Animated>
-                  <Animated animation="slide-up" delay={180} duration={800} distance={40}>
-                    <Input
-                      id="lastName"
-                      label="Last Name"
-                      placeholder="Doe"
-                      required
-                    />
-                  </Animated>
+                  <Input
+                    id="firstName"
+                    label="First Name"
+                    placeholder="John"
+                    required
+                  />
+                  <Input
+                    id="lastName"
+                    label="Last Name"
+                    placeholder="Doe"
+                    required
+                  />
                 </div>
 
-                <Animated animation="slide-up" delay={260} duration={800} distance={40}>
-                  <Input
-                    id="email"
-                    type="email"
-                    label="Email"
-                    placeholder="john@example.com"
-                    required
-                  />
-                </Animated>
+                <Input
+                  id="email"
+                  type="email"
+                  label="Email"
+                  placeholder="john@example.com"
+                  required
+                />
 
-                <Animated animation="slide-up" delay={340} duration={800} distance={40}>
-                  <Textarea
-                    id="message"
-                    label="Message"
-                    placeholder="Tell us about your project or inquiry..."
-                    required
-                  />
-                </Animated>
+                <Textarea
+                  id="message"
+                  label="Message"
+                  placeholder="Tell us about your project or inquiry..."
+                  required
+                />
 
-                <Animated animation="slide-up" delay={420} duration={800} distance={40}>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="lg"
-                    className="w-full hover-icon-shift"
-                    isLoading={isSubmitting}
-                  >
-                    {isSubmitting ? "Sending..." : "Send Message"}
-                    {!isSubmitting && (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                    )}
-                  </Button>
-                </Animated>
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  size="lg"
+                  className="w-full hover-icon-shift press-effect"
+                  isLoading={isSubmitting}
+                >
+                  {isSubmitting ? "Sending..." : "Send Message"}
+                  {!isSubmitting && (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  )}
+                </Button>
               </form>
             )}
           </div>
         </Animated>
 
-        {/* Contact Info */}
-        <Animated animation="slide-left" duration={1000} distance={80} className="order-1 lg:order-2">
+        {/* Contact Info - Streamlined */}
+        <Animated animation="slide-up" duration={700} distance={50} delay={100} className="order-1 lg:order-2">
           <div className="lg:sticky lg:top-32">
-            <Animated animation="slide-up" delay={100} duration={900} distance={50}>
-              <h3 className="text-2xl font-bold text-white mb-3">
-                Let&apos;s Talk
-              </h3>
-            </Animated>
-            <Animated animation="slide-up" delay={180} duration={900} distance={40}>
-              <p className="text-neutral-400 mb-10 leading-relaxed">
-                Whether you&apos;re looking to convert your vehicle to electric, upgrade your EV&apos;s performance, or simply want to learn more about our solutions, our team is here to help.
-              </p>
-            </Animated>
+            <h3 className="text-2xl font-semibold text-ice-100 mb-3">
+              Let&apos;s Talk
+            </h3>
+            <p className="text-ice-400 mb-10 leading-relaxed">
+              Whether you&apos;re looking to convert your vehicle to electric, upgrade your EV&apos;s performance, or simply want to learn more about our solutions, our team is here to help.
+            </p>
 
-            {/* Contact Cards */}
+            {/* Contact Cards - Cleaner */}
             <div className="space-y-4 mb-12">
               {contactInfo.map((info, index) => (
                 <Animated
                   key={info.label}
-                  animation="flip-left"
-                  delay={250 + index * 120}
-                  duration={900}
-                  distance={60}
+                  animation="slide-up"
+                  delay={200 + index * 80}
+                  duration={600}
+                  distance={30}
                 >
-                  <div className="group flex items-center gap-5 p-5 rounded-xl bg-neutral-800/15 border border-neutral-700/20 backdrop-blur-sm transition-all duration-400 hover:bg-neutral-800/30 hover:border-primary-500/20 hover-lift">
-                    <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500/15 to-primary-500/5 flex items-center justify-center text-primary-400 group-hover:scale-105 group-hover:from-primary-500/25 transition-all duration-300">
+                  <div className="group flex items-center gap-5 p-5 rounded-xl bg-navy-700/65 border border-ice-300/20 transition-[background-color,border-color] duration-200 hover:bg-navy-700/80 hover:border-ice-300/30 hover-lift shadow-lg shadow-navy-900/25">
+                    <div className="flex-shrink-0 w-14 h-14 rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-500/5 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-105 group-hover:from-amber-500/25 group-hover:border-amber-500/30 transition-[transform,background-image,border-color] duration-200">
                       {info.icon}
                     </div>
                     <div>
-                      <p className="text-sm text-neutral-500 mb-1 uppercase tracking-wider">{info.label}</p>
+                      <p className="text-sm text-ice-400/80 mb-1 uppercase tracking-wider">{info.label}</p>
                       {info.href ? (
                         <a
                           href={info.href}
-                          className="text-white font-medium hover:text-primary-400 transition-colors duration-200 link-underline"
+                          className="text-ice-100 font-medium hover:text-amber-400 transition-colors duration-200"
                         >
                           {info.value}
                         </a>
                       ) : (
-                        <p className="text-white font-medium">{info.value}</p>
+                        <p className="text-ice-100 font-medium">{info.value}</p>
                       )}
                     </div>
                   </div>
@@ -192,26 +178,26 @@ export function ContactSection() {
               ))}
             </div>
 
-            {/* Map Placeholder */}
-            <Animated animation="zoom-in" delay={600} duration={1000}>
-              <div className="relative h-64 rounded-2xl overflow-hidden bg-neutral-800/20 border border-neutral-700/20 group">
+            {/* Map Placeholder - Optimized */}
+            <Animated animation="fade" delay={450} duration={600}>
+              <div className="relative h-64 rounded-xl overflow-hidden bg-navy-700/60 border border-ice-300/20 group shadow-lg shadow-navy-900/25">
                 <div
-                  className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-60 group-hover:scale-105 transition-all duration-700"
+                  className="absolute inset-0 bg-cover bg-center opacity-40 transition-[transform,opacity] duration-400 group-hover:opacity-50 group-hover:scale-[1.03]"
                   style={{
                     backgroundImage: `url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop')`,
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-900/50 to-transparent" />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/20 group-hover:scale-105 transition-transform duration-300">
-                      <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center accent-amber group-hover:scale-105 transition-transform duration-200">
+                      <svg className="w-7 h-7 text-navy-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                     </div>
-                    <p className="text-white font-medium text-lg">Karlovo, Bulgaria</p>
-                    <p className="text-neutral-400 text-sm mt-1">Visit our facility</p>
+                    <p className="text-ice-100 font-medium text-lg">Karlovo, Bulgaria</p>
+                    <p className="text-ice-400 text-sm mt-1">Visit our facility</p>
                   </div>
                 </div>
               </div>
