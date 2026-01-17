@@ -120,7 +120,7 @@ const Animated = forwardRef<HTMLDivElement, AnimatedProps>(
       delay = 0,
       duration = 700,
       threshold = 0.05,
-      triggerOnce = false,
+      triggerOnce = true, // Default to true - animate in once, no animate out
       distance = 50,
       className,
       as: Component = "div",
@@ -196,7 +196,7 @@ function AnimatedGroup({
   staggerDelay = 100,
   duration = 700,
   threshold = 0.05,
-  triggerOnce = false,
+  triggerOnce = true, // Default to true - animate in once, no animate out
   distance = 50,
   className,
   ...props

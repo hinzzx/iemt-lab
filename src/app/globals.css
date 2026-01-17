@@ -290,6 +290,20 @@
 
 html {
   scroll-behavior: smooth;
+  /* Prevent iOS text size adjustment on orientation change */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Mobile touch optimization - eliminates 300ms tap delay */
+a,
+button,
+[role="button"],
+input,
+select,
+textarea,
+label,
+summary {
+  touch-action: manipulation;
 }
 
 body {
@@ -636,9 +650,8 @@ p {
 
 /* Subtle Glass - Use sparingly, only when truly needed */
 .glass-subtle {
-  background: rgba(17, 56, 89, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(17, 56, 89, 0.9);
+  /* Removed backdrop-filter blur for mobile performance */
   border: 1px solid rgba(168, 196, 207, 0.2);
   box-shadow: 0 4px 16px -2px rgba(10, 31, 48, 0.3);
 }

@@ -4,12 +4,19 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Animated } from "@/components/ui/animated";
+import { PageLoader } from "@/components/ui/page-loader";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
+// Critical images to preload
+const criticalImages = [
+  "/Converted_Bus.png",
+  "/logos/full_transparent.svg",
+];
+
 export default function ConvertedVehiclesPage() {
   return (
-    <>
+    <PageLoader imagesToPreload={criticalImages}>
       <Header />
       <main>
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-navy-700">
@@ -25,14 +32,14 @@ export default function ConvertedVehiclesPage() {
           {/* Grid Pattern */}
           <div className="absolute inset-0 bg-grid-pattern opacity-30" />
           
-          {/* Gradient Accents - Eco green for conversion context */}
+          {/* Gradient Accents - Performance optimized (no blur) */}
           <div 
-            className="absolute top-1/4 right-1/4 w-[600px] h-[600px] rounded-full blur-[200px] opacity-15 pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(76, 175, 80, 0.5) 0%, transparent 70%)' }}
+            className="absolute top-1/4 right-1/4 w-[600px] h-[600px] rounded-full opacity-12 pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(76, 175, 80, 0.4) 0%, transparent 60%)' }}
           />
           <div 
-            className="absolute bottom-1/3 left-1/4 w-[500px] h-[500px] rounded-full blur-[180px] opacity-10 pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(191, 139, 75, 0.4) 0%, transparent 70%)' }}
+            className="absolute bottom-1/3 left-1/4 w-[500px] h-[500px] rounded-full opacity-8 pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(191, 139, 75, 0.3) 0%, transparent 60%)' }}
           />
 
           <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 py-32 text-center">
@@ -62,25 +69,25 @@ export default function ConvertedVehiclesPage() {
             {/* Vehicle Types Preview */}
             <Animated animation="zoom-in" delay={450} duration={1000} triggerOnce>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-4xl mx-auto">
-                <div className="p-5 rounded-lg bg-navy-800/30 border border-navy-600/30 backdrop-blur-sm group hover:border-eco/30 transition-all duration-300">
+                <div className="p-5 rounded-lg bg-navy-800/70 border border-navy-600/40 group hover:border-eco/40 transition-colors duration-200">
                   <svg className="w-10 h-10 mx-auto mb-3 text-ice-500 group-hover:text-eco transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                   </svg>
                   <div className="text-ice-100 font-medium text-sm">Cars</div>
                 </div>
-                <div className="p-5 rounded-lg bg-navy-800/30 border border-navy-600/30 backdrop-blur-sm group hover:border-eco/30 transition-all duration-300">
+                <div className="p-5 rounded-lg bg-navy-800/70 border border-navy-600/40 group hover:border-eco/40 transition-colors duration-200">
                   <svg className="w-10 h-10 mx-auto mb-3 text-ice-500 group-hover:text-eco transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <div className="text-ice-100 font-medium text-sm">Vans</div>
                 </div>
-                <div className="p-5 rounded-lg bg-navy-800/30 border border-navy-600/30 backdrop-blur-sm group hover:border-eco/30 transition-all duration-300">
+                <div className="p-5 rounded-lg bg-navy-800/70 border border-navy-600/40 group hover:border-eco/40 transition-colors duration-200">
                   <svg className="w-10 h-10 mx-auto mb-3 text-ice-500 group-hover:text-eco transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                   <div className="text-ice-100 font-medium text-sm">Buses</div>
                 </div>
-                <div className="p-5 rounded-lg bg-navy-800/30 border border-navy-600/30 backdrop-blur-sm group hover:border-eco/30 transition-all duration-300">
+                <div className="p-5 rounded-lg bg-navy-800/70 border border-navy-600/40 group hover:border-eco/40 transition-colors duration-200">
                   <svg className="w-10 h-10 mx-auto mb-3 text-ice-500 group-hover:text-eco transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                   </svg>
@@ -138,6 +145,6 @@ export default function ConvertedVehiclesPage() {
         </section>
       </main>
       <Footer />
-    </>
+    </PageLoader>
   );
 }

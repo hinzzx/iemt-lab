@@ -54,9 +54,9 @@ const socialLinks = [
 export function Footer() {
   return (
     <footer className="relative bg-navy-900 border-t border-navy-700/40 overflow-hidden">
-      {/* Subtle background accents */}
-      <div className="absolute top-0 left-1/4 w-80 h-80 bg-amber-500/3 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-60 h-60 bg-ice-400/3 rounded-full blur-[120px] pointer-events-none" />
+      {/* Subtle background accents - Performance optimized (no blur) */}
+      <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.03) 0%, transparent 60%)' }} />
+      <div className="absolute bottom-0 right-1/4 w-60 h-60 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(186,230,253,0.03) 0%, transparent 60%)' }} />
       
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">

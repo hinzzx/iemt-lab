@@ -15,7 +15,7 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
   const {
     threshold = 0.05,
     rootMargin = "0px 0px 80px 0px",
-    triggerOnce = false,
+    triggerOnce = true, // Default to true for better performance
     delay = 0,
   } = options;
 

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Animated } from "@/components/ui/animated";
 import { Section, SectionHeader } from "@/components/ui/section";
+import { PageLoader } from "@/components/ui/page-loader";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
@@ -191,6 +192,15 @@ const coreComponents = [
   },
 ];
 
+// Critical images to preload for smooth experience
+const criticalImages = [
+  "/HyperGlide.png",
+  "/EonTrail.png",
+  "/TitanVolt.png",
+  "/Core_Components.png",
+  "/logos/full_transparent.svg",
+];
+
 export default function ConvertedATVPage() {
   const [highlightedComponent, setHighlightedComponent] = useState<string | null>(null);
 
@@ -203,7 +213,7 @@ export default function ConvertedATVPage() {
   };
 
   return (
-    <>
+    <PageLoader imagesToPreload={criticalImages}>
       <Header />
       <main>
         {/* Hero Section */}
@@ -220,14 +230,14 @@ export default function ConvertedATVPage() {
           {/* Grid Pattern */}
           <div className="absolute inset-0 bg-grid-pattern opacity-20" />
           
-          {/* Gradient Accents - Power orange for ATV context */}
+          {/* Gradient Accents - Performance optimized (no blur) */}
           <div 
-            className="absolute top-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-[180px] opacity-20 pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(255, 107, 53, 0.6) 0%, transparent 70%)' }}
+            className="absolute top-1/4 right-1/4 w-[500px] h-[500px] rounded-full opacity-15 pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(255, 107, 53, 0.4) 0%, transparent 60%)' }}
           />
           <div 
-            className="absolute bottom-1/3 left-1/4 w-[400px] h-[400px] rounded-full blur-[150px] opacity-15 pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(191, 139, 75, 0.5) 0%, transparent 70%)' }}
+            className="absolute bottom-1/3 left-1/4 w-[400px] h-[400px] rounded-full opacity-10 pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(191, 139, 75, 0.3) 0%, transparent 60%)' }}
           />
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-32 text-center">
@@ -296,7 +306,7 @@ export default function ConvertedATVPage() {
                 distance={50}
                 triggerOnce
               >
-                <div className="group p-6 rounded-lg bg-navy-800/20 border border-navy-600/20 backdrop-blur-sm hover:bg-navy-800/40 hover:border-amber-500/20 transition-all duration-500 hover-lift">
+                <div className="group p-6 rounded-lg bg-navy-800/60 border border-navy-600/30 hover:bg-navy-800/80 hover:border-amber-500/30 transition-colors duration-300 hover-lift">
                   <div className="inline-flex items-center justify-center w-12 h-12 mb-4 rounded-lg bg-gradient-to-br from-power/15 to-amber-500/5 text-power group-hover:scale-110 transition-transform duration-300">
                     {feature.icon}
                   </div>
@@ -357,7 +367,6 @@ export default function ConvertedATVPage() {
                           flex items-center gap-1.5 sm:gap-2
                           px-2 py-1 sm:px-3 sm:py-1.5 md:px-3.5 md:py-2
                           rounded-md
-                          backdrop-blur-md
                           shadow-lg
                           transition-all duration-300
                           hover:bg-navy-800 hover:border-amber-400 
@@ -477,8 +486,8 @@ export default function ConvertedATVPage() {
                         <div className="w-24 h-24 rounded-xl bg-navy-900 border-2 border-navy-600/60 flex items-center justify-center group-hover:border-amber-500/60 group-hover:bg-navy-900/80 transition-all duration-500 shadow-lg shadow-navy-900/50">
                           <span className="text-3xl font-bold text-gradient font-mono">{step.step}</span>
                         </div>
-                        {/* Glow effect on hover */}
-                        <div className="absolute inset-0 rounded-xl bg-amber-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+                        {/* Glow effect on hover - shadow instead of blur */}
+                        <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 shadow-[0_0_30px_rgba(245,158,11,0.3)]" />
                       </div>
                       
                       {/* Content */}
@@ -682,6 +691,6 @@ export default function ConvertedATVPage() {
         </Section>
       </main>
       <Footer />
-    </>
+    </PageLoader>
   );
 }

@@ -4,12 +4,19 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Animated } from "@/components/ui/animated";
+import { PageLoader } from "@/components/ui/page-loader";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 
+// Critical images to preload
+const criticalImages = [
+  "/KangoZE.jpg",
+  "/logos/full_transparent.svg",
+];
+
 export default function KangoZEEnhancedPage() {
   return (
-    <>
+    <PageLoader imagesToPreload={criticalImages}>
       <Header />
       <main>
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-navy-700">
@@ -25,14 +32,14 @@ export default function KangoZEEnhancedPage() {
           {/* Grid Pattern */}
           <div className="absolute inset-0 bg-grid-pattern opacity-30" />
           
-          {/* Gradient Accents - Cloud blue for software/tech context */}
+          {/* Gradient Accents - Performance optimized (no blur) */}
           <div 
-            className="absolute top-1/3 left-1/3 w-[600px] h-[600px] rounded-full blur-[200px] opacity-15 pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(46, 173, 211, 0.5) 0%, transparent 70%)' }}
+            className="absolute top-1/3 left-1/3 w-[600px] h-[600px] rounded-full opacity-12 pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(46, 173, 211, 0.4) 0%, transparent 60%)' }}
           />
           <div 
-            className="absolute bottom-1/4 right-1/3 w-[500px] h-[500px] rounded-full blur-[180px] opacity-10 pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(191, 139, 75, 0.4) 0%, transparent 70%)' }}
+            className="absolute bottom-1/4 right-1/3 w-[500px] h-[500px] rounded-full opacity-8 pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(191, 139, 75, 0.3) 0%, transparent 60%)' }}
           />
 
           <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 py-32 text-center">
@@ -62,15 +69,15 @@ export default function KangoZEEnhancedPage() {
             {/* Feature Preview - Monospace for specs */}
             <Animated animation="zoom-in" delay={450} duration={1000} triggerOnce>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-3xl mx-auto">
-                <div className="p-6 rounded-lg bg-navy-800/30 border border-navy-600/30 backdrop-blur-sm">
+                <div className="p-6 rounded-lg bg-navy-800/70 border border-navy-600/40">
                   <div className="text-3xl font-bold text-gradient font-mono mb-2">2x</div>
                   <div className="text-ice-400 text-sm">Extended Range</div>
                 </div>
-                <div className="p-6 rounded-lg bg-navy-800/30 border border-navy-600/30 backdrop-blur-sm">
+                <div className="p-6 rounded-lg bg-navy-800/70 border border-navy-600/40">
                   <div className="text-3xl font-bold text-gradient font-mono mb-2">Smart</div>
                   <div className="text-ice-400 text-sm">BMS Technology</div>
                 </div>
-                <div className="p-6 rounded-lg bg-navy-800/30 border border-navy-600/30 backdrop-blur-sm">
+                <div className="p-6 rounded-lg bg-navy-800/70 border border-navy-600/40">
                   <div className="text-3xl font-bold text-gradient font-mono mb-2">Pro</div>
                   <div className="text-ice-400 text-sm">Performance Upgrade</div>
                 </div>
@@ -120,6 +127,6 @@ export default function KangoZEEnhancedPage() {
         </section>
       </main>
       <Footer />
-    </>
+    </PageLoader>
   );
 }

@@ -21,7 +21,7 @@ const buttonVariants = cva(
           "border-2 border-navy-700 text-navy-700 bg-transparent hover:bg-navy-50 focus-visible:ring-navy-500",
         // Ghost: For dark backgrounds
         ghost:
-          "border border-ice-400/30 text-ice-100 backdrop-blur-sm hover:bg-ice-400/10 hover:border-ice-400/50 focus-visible:ring-ice-400",
+          "border border-ice-400/30 text-ice-100 bg-navy-900/40 hover:bg-ice-400/10 hover:border-ice-400/50 focus-visible:ring-ice-400",
         // Tertiary: Subtle, text-only feel
         tertiary:
           "text-ice-300 hover:text-ice-100 hover:bg-navy-800/60",
