@@ -6,3 +6,4 @@ export { Textarea } from "./textarea";
 export { Section, SectionHeader } from "./section";
 export { Animated, AnimatedGroup } from "./animated";
 export { PageLoader } from "./page-loader";
+export { QuoteFormModal } from "./quote-form-modal";

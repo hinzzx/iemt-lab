@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Animated } from "@/components/ui/animated";
@@ -9,6 +10,7 @@ import { Section, SectionHeader } from "@/components/ui/section";
 import { PageLoader } from "@/components/ui/page-loader";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { handleSectionNavigation, handleInitialHash } from "@/lib/navigation";
 
 const features = [
   {
@@ -23,7 +25,12 @@ const features = [
   {
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+        {/* Battery body */}
+        <rect x="4" y="8" width="14" height="10" rx="1.5" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} />
+        {/* Battery terminal/tip */}
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 11h2a1 1 0 011 1v2a1 1 0 01-1 1h-2" />
+        {/* Battery level bars */}
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 11v4M10 11v4M13 11v4M15.5 11v4" />
       </svg>
     ),
     title: "Up to 10 kWh battery",
@@ -212,6 +219,11 @@ export default function ConvertedATVPage() {
     }, 1000);
   };
 
+  // Handle hash navigation on initial page load
+  useEffect(() => {
+    handleInitialHash();
+  }, []);
+
   return (
     <PageLoader imagesToPreload={criticalImages}>
       <Header />
@@ -340,10 +352,14 @@ export default function ConvertedATVPage() {
               */}
               <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl">
                 {/* ATV Image */}
-                <img 
+                <Image 
                   src="/Core_Components.png" 
                   alt="Electric ATV Core Components"
+                  width={800}
+                  height={600}
                   className="block w-full h-auto"
+                  quality={85}
+                  priority
                 />
                 
                 {/* Component Labels - absolutely positioned over image */}
@@ -669,7 +685,7 @@ export default function ConvertedATVPage() {
             
             <Animated animation="zoom-in" delay={200} duration={900} triggerOnce>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/#contact">
+                <Link href="/#contact" onClick={(e) => handleSectionNavigation(e, "/#contact")}>
                   <Button variant="secondary" size="xl" className="hover-icon-shift animate-glow-slow text-sm sm:text-base">
                     <span>Get a Quote</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -677,7 +693,7 @@ export default function ConvertedATVPage() {
                     </svg>
                   </Button>
                 </Link>
-                <Link href="/">
+                <Link href="/" onClick={(e) => handleSectionNavigation(e, "/")}>
                   <Button variant="ghost" size="xl" className="hover-icon-shift text-sm sm:text-base">
                     <span>Back to Home</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

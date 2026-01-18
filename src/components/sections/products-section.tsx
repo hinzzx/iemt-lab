@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { CardDark, CardHeader, CardTitleDark, CardDescriptionDark, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -67,22 +68,27 @@ export function ProductsSection() {
                 {product.badge}
               </Badge>
 
-              {/* Image Container - Performance optimized */}
+              {/* Image Container - Performance optimized with Next.js Image */}
               <div className="relative h-56 overflow-hidden rounded-t-xl">
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-300 ease-out group-hover:scale-[1.03]"
-                  style={{ 
-                    backgroundImage: `url(${product.image})`,
-                  }}
+                <Image
+                  src={product.image}
+                  alt={product.title}
+                  fill
+                  className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  quality={85}
+                  loading="lazy"
                 />
                 {/* Optimized overlay - less opacity change */}
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-900/80 via-navy-900/20 to-transparent group-hover:from-navy-900/65 transition-[background-image] duration-200" />
               </div>
 
               <CardHeader className="relative">
-                <CardTitleDark className="text-2xl group-hover:text-amber-400 transition-colors duration-200">
-                  {product.title}
-                </CardTitleDark>
+                <Link href={product.href}>
+                  <CardTitleDark className="text-2xl group-hover:text-amber-400 transition-colors duration-200 cursor-pointer">
+                    {product.title}
+                  </CardTitleDark>
+                </Link>
                 {/* Refined underline */}
                 <div className="absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-amber-500/60 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center" />
               </CardHeader>

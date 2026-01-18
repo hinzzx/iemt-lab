@@ -13,8 +13,8 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
   options: UseScrollAnimationOptions = {}
 ) {
   const {
-    threshold = 0.05,
-    rootMargin = "0px 0px 80px 0px",
+    threshold = 0.1, // 10% of element visible - sweet spot for visibility
+    rootMargin = "0px 0px 150px 0px", // 150px lookahead - balanced for smooth scroll
     triggerOnce = true, // Default to true for better performance
     delay = 0,
   } = options;
@@ -26,18 +26,33 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
     const element = ref.current;
     if (!element) return;
 
+    let timeoutId: NodeJS.Timeout | null = null;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
+          // Use requestAnimationFrame to ensure animation starts before next paint
+          // This prevents skipped frames on fast mobile scroll
           if (delay > 0) {
-            setTimeout(() => setIsVisible(true), delay);
+            timeoutId = setTimeout(() => {
+              requestAnimationFrame(() => {
+                setIsVisible(true);
+              });
+            }, delay);
           } else {
-            setIsVisible(true);
+            requestAnimationFrame(() => {
+              setIsVisible(true);
+            });
           }
           if (triggerOnce) {
             observer.unobserve(element);
           }
         } else if (!triggerOnce) {
+          // Clear pending timeout when scrolling away
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+          }
           setIsVisible(false);
         }
       },
@@ -46,7 +61,13 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
 
     observer.observe(element);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      // CRITICAL: Clean up timeout on unmount
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [threshold, rootMargin, triggerOnce, delay]);
 
   return { ref, isVisible };

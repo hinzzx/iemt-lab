@@ -319,6 +319,21 @@ body {
   overflow-x: hidden;
 }
 
+/* Mobile scroll performance optimization */
+@media (max-width: 767px) {
+  html {
+    /* Improve scroll performance on mobile */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Ensure animations are GPU accelerated on mobile */
+  [data-animate] {
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}
+
 /* Maximum line length for body text */
 p {
   max-width: 68ch;
@@ -413,13 +428,14 @@ p {
   }
 }
 
-/* Subtle Glow - CTA button (lightweight) */
+/* Subtle Glow - CTA button - GPU-accelerated version using pseudo-element opacity */
+/* OLD version animated box-shadow which causes repaints - now uses opacity which is GPU-accelerated */
 @keyframes subtleGlow {
   0%, 100% {
-    box-shadow: 0 4px 12px -2px rgba(191, 139, 75, 0.15);
+    opacity: 0.4;
   }
   50% {
-    box-shadow: 0 8px 20px -2px rgba(191, 139, 75, 0.3);
+    opacity: 1;
   }
 }
 
@@ -457,8 +473,39 @@ p {
   animation: gentlePulse 3s ease-in-out infinite;
 }
 
+/* GPU-accelerated glow using pseudo-element with opacity animation instead of box-shadow */
 .animate-glow-subtle {
+  position: relative;
+}
+
+.animate-glow-subtle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 8px 24px -2px rgba(191, 139, 75, 0.35);
+  opacity: 0.4;
   animation: subtleGlow 3.5s ease-in-out infinite;
+  pointer-events: none;
+  /* GPU acceleration for opacity animation */
+  will-change: opacity;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Mobile: Defer decorative animations until page is stable (reduces first-interaction jank) */
+@media (max-width: 767px) {
+  .animate-glow-subtle::before {
+    /* Start with no animation, let CSS load first */
+    animation-play-state: paused;
+    animation-delay: 2s; /* Delay start on mobile */
+  }
+  
+  /* Enable after page paint settles */
+  @starting-style {
+    .animate-glow-subtle::before {
+      animation-play-state: running;
+    }
+  }
 }
 
 @keyframes fadeIn {
@@ -676,6 +723,81 @@ p {
 /* Minimal ambient glow for special elements only */
 .glow-minimal {
   box-shadow: 0 0 24px -8px rgba(191, 139, 75, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GPU ACCELERATION UTILITIES - For instant first-interaction animations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Force GPU layer promotion - use for elements that will animate */
+.gpu-promoted {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE PERFORMANCE OPTIMIZATIONS
+   Reduces animation competition during first 3-5 seconds of page load
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Burger line warm-up animation - forces early GPU layer compositing */
+/* This tiny animation runs once at startup, making the browser create compositor layers */
+/* before the user interacts, eliminating first-interaction jank */
+/* Uses opacity instead of transform to avoid interfering with the burger->cross transform */
+@keyframes burgerWarmup {
+  0% { 
+    opacity: 0.999; 
+  }
+  100% { 
+    opacity: 1; 
+  }
+}
+
+.burger-line-warmup {
+  /* Run a nearly-invisible animation that forces layer creation without interfering with transform */
+  animation: burgerWarmup 1ms linear 1;
+}
+
+@media (max-width: 767px) {
+  /* Pre-promote burger menu button and its children to GPU layers - HIGHEST PRIORITY */
+  /* NOTE: transform is handled via inline styles in Header.tsx to allow dynamic cross animation */
+  [aria-label="Toggle menu"],
+  [aria-label="Toggle menu"] > div {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    /* Isolate from other layers */
+    isolation: isolate;
+    /* Force immediate GPU compositing */
+    will-change: transform;
+  }
+  
+  /* Burger line spans - only set non-transform properties to avoid overriding inline transforms */
+  [aria-label="Toggle menu"] span {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+  
+  /* Mobile overlay containment - isolates paint operations */
+  [aria-hidden] {
+    contain: layout paint;
+  }
+  
+  /* Defer decorative pulse animations on mobile - these compete with burger animation */
+  .animate-pulse-gentle {
+    animation-delay: 3s;
+  }
+  
+  /* Defer scroll indicator animation */
+  .animate-scroll-indicator {
+    animation-delay: 2.5s;
+  }
+  
+  /* Reduce animation complexity on mobile during initial load */
+  .animate-shine::after {
+    animation-delay: 4s;
+  }
 }
 
 /* Smooth scrollbar */

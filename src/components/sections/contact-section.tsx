@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,19 +44,33 @@ const contactInfo = [
 export function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Simulate form submission with cleanup
+    await new Promise(resolve => {
+      timeoutRef.current = setTimeout(resolve, 1500);
+    });
     
     setIsSubmitting(false);
     setIsSubmitted(true);
     
-    // Reset after 3 seconds
-    setTimeout(() => setIsSubmitted(false), 3000);
+    // Reset after 3 seconds with cleanup
+    timeoutRef.current = setTimeout(() => {
+      setIsSubmitted(false);
+    }, 3000);
   };
 
   return (
@@ -178,14 +193,17 @@ export function ContactSection() {
               ))}
             </div>
 
-            {/* Map Placeholder - Optimized */}
+            {/* Map Placeholder - Optimized with Next.js Image */}
             <Animated animation="fade" delay={450} duration={600}>
               <div className="relative h-64 rounded-xl overflow-hidden bg-navy-700/60 border border-ice-300/20 group shadow-lg shadow-navy-900/25">
-                <div
-                  className="absolute inset-0 bg-cover bg-center opacity-40 transition-[transform,opacity] duration-400 group-hover:opacity-50 group-hover:scale-[1.03]"
-                  style={{
-                    backgroundImage: `url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop')`,
-                  }}
+                <Image
+                  src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop"
+                  alt="Karlovo, Bulgaria map location"
+                  fill
+                  className="object-cover opacity-40 transition-[transform,opacity] duration-400 group-hover:opacity-50 group-hover:scale-[1.03]"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  quality={60}
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-900/50 to-transparent" />
                 <div className="absolute inset-0 flex items-center justify-center">

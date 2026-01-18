@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { forwardRef, type HTMLAttributes } from "react";
+import Image from "next/image";
 import { Animated } from "./animated";
 
 interface SectionProps extends HTMLAttributes<HTMLElement> {
@@ -40,10 +41,16 @@ const Section = forwardRef<HTMLElement, SectionProps>(
       >
         {/* Background Image */}
         {backgroundImage && (
-          <div
-            className="absolute inset-0 opacity-10 bg-cover bg-center"
-            style={{ backgroundImage: `url(${backgroundImage})` }}
-          >
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
+            <Image
+              src={backgroundImage}
+              alt=""
+              fill
+              className="object-cover"
+              quality={30} // Lower quality for background images
+              priority={false} // Lazy load background images
+              sizes="100vw"
+            />
             <div className="absolute inset-0 bg-gradient-to-b from-navy-700/50 via-navy-700/70 to-navy-700" />
           </div>
         )}

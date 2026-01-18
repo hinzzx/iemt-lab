@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 
 interface PageLoaderProps {
@@ -8,9 +8,41 @@ interface PageLoaderProps {
   imagesToPreload?: string[];
 }
 
+// Creative loading messages related to EV conversion and electric mobility
+const loadingMessages = [
+  "Removing the engine, importing the battery...",
+  "Charging up the electrons...",
+  "Converting combustion to clean energy...",
+  "Turbocharging the electric motors...",
+  "Downloading instant torque...",
+  "Wiring up the future...",
+  "Syncing with the grid...",
+  "Optimizing battery efficiency...",
+  "Calibrating regenerative braking...",
+  "Installing zero-emission technology...",
+  "Electrifying the adventure...",
+  "Powering up the silent revolution...",
+  "Connecting to the cloud...",
+  "Boosting range algorithms...",
+  "Preparing your electric journey...",
+  "Assembling the battery pack...",
+  "Fine-tuning the CAN bus...",
+  "Activating electric drive mode...",
+  "Loading sustainable mobility...",
+  "Initializing green technology...",
+];
+
 export function PageLoader({ children, imagesToPreload = [] }: PageLoaderProps) {
   const [loadingState, setLoadingState] = useState<"loading" | "exiting" | "complete">("loading");
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const timeoutRefs = useRef<NodeJS.Timeout[]>([]);
+  
+  // Select a random loading message on client-side only (prevents hydration mismatch)
+  const [loadingMessage] = useState(() => {
+    // Initialize with random message - runs only once on mount
+    // We use suppressHydrationWarning on the element to handle SSR/client mismatch
+    return loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+  });
 
   useEffect(() => {
     // Minimum loading time for smooth experience
@@ -49,7 +81,8 @@ export function PageLoader({ children, imagesToPreload = [] }: PageLoaderProps) 
         await preloadImages();
       } else {
         await new Promise<void>((resolve) => {
-          window.addEventListener("load", () => resolve());
+          const handler = () => resolve();
+          window.addEventListener("load", handler, { once: true });
         });
         await preloadImages();
       }
@@ -58,17 +91,25 @@ export function PageLoader({ children, imagesToPreload = [] }: PageLoaderProps) 
       const elapsed = Date.now() - startTime;
       const remainingTime = Math.max(0, minLoadTime - elapsed);
 
-      setTimeout(() => {
+      const timeout1 = setTimeout(() => {
         // Start exit animation
         setLoadingState("exiting");
         // Complete after exit animation finishes
-        setTimeout(() => {
+        const timeout2 = setTimeout(() => {
           setLoadingState("complete");
         }, 600);
+        timeoutRefs.current.push(timeout2);
       }, remainingTime);
+      timeoutRefs.current.push(timeout1);
     };
 
     loadContent();
+
+    // CRITICAL: Cleanup all timeouts on unmount to prevent memory leaks
+    return () => {
+      timeoutRefs.current.forEach(clearTimeout);
+      timeoutRefs.current = [];
+    };
   }, [imagesToPreload]);
 
   // Only render children when loading is complete - prevents double animation triggers
@@ -130,8 +171,9 @@ export function PageLoader({ children, imagesToPreload = [] }: PageLoaderProps) 
             className={`text-ice-400 text-sm font-light tracking-wider transition-all duration-500 ${
               loadingState === "exiting" ? "opacity-0" : "opacity-100"
             }`}
+            suppressHydrationWarning
           >
-            Loading Experience...
+            {loadingMessage}
           </p>
         </div>
       </div>

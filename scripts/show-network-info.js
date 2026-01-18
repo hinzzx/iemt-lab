@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const os = require('os');
 
 function getLocalIPv4() {

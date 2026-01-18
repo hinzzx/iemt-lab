@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
     ],
     // Optimize images for faster loading
     formats: ["image/avif", "image/webp"],
+    // Configure quality levels used throughout the app
+    qualities: [30, 60, 75, 85],
   },
 
   // Optimize for production

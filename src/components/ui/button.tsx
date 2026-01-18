@@ -6,7 +6,7 @@ import { forwardRef, type ButtonHTMLAttributes } from "react";
 
 const buttonVariants = cva(
   // Base styles per spec: uppercase, letter-spacing 0.02em, font-semibold (600)
-  "relative inline-flex items-center justify-center gap-2.5 font-semibold uppercase tracking-wide overflow-hidden transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "group relative inline-flex items-center justify-center gap-2.5 font-semibold uppercase tracking-wide overflow-hidden transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
   {
     variants: {
       variant: {

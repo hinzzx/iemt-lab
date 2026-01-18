@@ -1,12 +1,15 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Animated } from "@/components/ui/animated";
 import { PageLoader } from "@/components/ui/page-loader";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { handleSectionNavigation, handleInitialHash } from "@/lib/navigation";
 
 // Critical images to preload
 const criticalImages = [
@@ -15,6 +18,11 @@ const criticalImages = [
 ];
 
 export default function KangoZEEnhancedPage() {
+  // Handle hash navigation on initial page load
+  useEffect(() => {
+    handleInitialHash();
+  }, []);
+
   return (
     <PageLoader imagesToPreload={criticalImages}>
       <Header />
@@ -22,9 +30,14 @@ export default function KangoZEEnhancedPage() {
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-navy-700">
           {/* Background */}
           <div className="absolute inset-0 bg-navy-900">
-            <div 
-              className="absolute inset-0 bg-cover bg-center opacity-20"
-              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1593941707882-a5bba14938c7?q=80&w=2072&auto=format&fit=crop')" }}
+            <Image
+              src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?q=80&w=2072&auto=format&fit=crop"
+              alt=""
+              fill
+              className="object-cover opacity-20"
+              quality={40}
+              priority={false}
+              sizes="100vw"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-navy-900/60 via-navy-700/80 to-navy-700" />
           </div>
@@ -105,7 +118,7 @@ export default function KangoZEEnhancedPage() {
 
             <Animated animation="zoom-in" delay={700} duration={900} triggerOnce>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/#contact">
+                <Link href="/#contact" onClick={(e) => handleSectionNavigation(e, "/#contact")}>
                   <Button variant="secondary" size="xl" className="hover-icon-shift">
                     <span>Notify Me</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +126,7 @@ export default function KangoZEEnhancedPage() {
                     </svg>
                   </Button>
                 </Link>
-                <Link href="/">
+                <Link href="/" onClick={(e) => handleSectionNavigation(e, "/")}>
                   <Button variant="ghost" size="xl" className="hover-icon-shift">
                     <span>Back to Home</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

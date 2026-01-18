@@ -1,7 +1,7 @@
 "use client";
 
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import { forwardRef, useCallback, type HTMLAttributes, type ReactNode, type CSSProperties } from "react";
+import type { HTMLAttributes, ReactNode, CSSProperties } from "react";
 
 type AnimationType = 
   | "fade"
@@ -112,72 +112,54 @@ const getAnimationStyles = (
   return getTransform();
 };
 
-const Animated = forwardRef<HTMLDivElement, AnimatedProps>(
-  (
-    {
-      children,
-      animation = "slide-up",
-      delay = 0,
-      duration = 700,
-      threshold = 0.05,
-      triggerOnce = true, // Default to true - animate in once, no animate out
-      distance = 50,
-      className,
-      as: Component = "div",
-      style,
-      ...props
-    },
-    forwardedRef
-  ) => {
-    const { ref: scrollRef, isVisible } = useScrollAnimation<HTMLDivElement>({
-      threshold,
-      triggerOnce,
-      delay,
-    });
+function Animated({
+  children,
+  animation = "slide-up",
+  delay = 0,
+  duration = 700,
+  threshold = 0.1, // 10% visible - balanced visibility and performance
+  triggerOnce = true, // Default to true - animate in once, no animate out
+  distance = 50,
+  className,
+  as: Component = "div",
+  style,
+  ...props
+}: AnimatedProps) {
+  const { ref, isVisible } = useScrollAnimation<HTMLDivElement>({
+    threshold,
+    triggerOnce,
+    delay: 0, // Remove delay from observer, handle it in CSS
+  });
 
-    const animationStyles = getAnimationStyles(animation, isVisible, distance);
-    
-    // Performance-optimized transitions using only GPU-accelerated properties
-    const combinedStyle: CSSProperties = {
-      ...animationStyles,
-      transitionProperty: "opacity, transform",
-      transitionDuration: `${duration}ms`,
-      transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)", // Smooth, premium easing
-      transitionDelay: isVisible ? `${delay}ms` : "0ms",
-      // Only set willChange when animating, remove after
-      willChange: !isVisible ? "opacity, transform" : "auto",
-      ...style,
-    };
+  const animationStyles = getAnimationStyles(animation, isVisible, distance);
+  
+  // Performance-optimized transitions using only GPU-accelerated properties
+  const combinedStyle: CSSProperties = {
+    ...animationStyles,
+    transitionProperty: "opacity, transform",
+    transitionDuration: `${duration}ms`,
+    transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)", // Smooth, premium easing
+    transitionDelay: isVisible ? `${delay}ms` : "0ms",
+    // CRITICAL: Keep willChange active to ensure smooth animations on mobile
+    // The browser needs this hint before the animation starts
+    willChange: "opacity, transform",
+    // Force GPU layer creation immediately
+    backfaceVisibility: "hidden" as const,
+    WebkitBackfaceVisibility: "hidden" as const,
+    ...style,
+  };
 
-    // Combine refs safely using callback ref
-    const combinedRef = useCallback((node: HTMLDivElement | null) => {
-      // Set the scroll animation ref (RefObject)
-      if (scrollRef && 'current' in scrollRef) {
-        (scrollRef as React.RefObject<HTMLDivElement | null>).current = node;
-      }
-      
-      // Set the forwarded ref
-      if (typeof forwardedRef === "function") {
-        forwardedRef(node);
-      } else if (forwardedRef) {
-        (forwardedRef as React.RefObject<HTMLDivElement | null>).current = node;
-      }
-    }, [scrollRef, forwardedRef]);
-
-    return (
-      <Component
-        ref={combinedRef}
-        className={className}
-        style={combinedStyle}
-        {...props}
-      >
-        {children}
-      </Component>
-    );
-  }
-);
-
-Animated.displayName = "Animated";
+  return (
+    <Component
+      ref={ref}
+      className={className}
+      style={combinedStyle}
+      {...props}
+    >
+      {children}
+    </Component>
+  );
+}
 
 // Staggered animation wrapper for lists
 interface AnimatedGroupProps extends HTMLAttributes<HTMLDivElement> {
@@ -195,7 +177,7 @@ function AnimatedGroup({
   animation = "slide-up",
   staggerDelay = 100,
   duration = 700,
-  threshold = 0.05,
+  threshold = 0.1,
   triggerOnce = true, // Default to true - animate in once, no animate out
   distance = 50,
   className,
@@ -219,7 +201,10 @@ function AnimatedGroup({
               transitionDuration: `${duration}ms`,
               transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
               transitionDelay: isVisible ? `${index * staggerDelay}ms` : "0ms",
-              willChange: !isVisible ? "opacity, transform" : "auto",
+              // Keep willChange active for smooth mobile performance
+              willChange: "opacity, transform",
+              backfaceVisibility: "hidden" as const,
+              WebkitBackfaceVisibility: "hidden" as const,
             }}
           >
             {child}
