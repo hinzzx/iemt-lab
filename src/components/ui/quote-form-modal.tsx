@@ -94,14 +94,14 @@ export function QuoteFormModal({ isOpen, onClose }: QuoteFormModalProps) {
   return (
     <div 
       className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-900/95",
-        "md:bg-navy-900/80 md:backdrop-blur-sm" // Only blur on desktop for better mobile performance
+        "modal-overlay",
+        isOpen && "open"
       )}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-navy-800 border border-ice-300/20 rounded-2xl shadow-2xl">
+      <div className="modal-content">
         {/* Close button - Fixed at top when scrolling */}
         <div className="sticky top-0 z-20 flex justify-end p-4 bg-gradient-to-b from-navy-800 via-navy-800 to-transparent pointer-events-none">
           <button

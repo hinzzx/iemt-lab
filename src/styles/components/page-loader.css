@@ -1,0 +1,107 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Page Loader Component
+   Fullscreen loading animation with logo and progress bar
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom right, rgb(10, 31, 48), rgb(15, 45, 69), rgb(10, 31, 48));
+  opacity: 1;
+  transition: opacity 500ms ease-out;
+}
+
+.page-loader.exiting {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Ambient effects */
+.page-loader-ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.page-loader-glow {
+  position: absolute;
+  width: 24rem;
+  height: 24rem;
+  border-radius: 9999px;
+  animation: gentlePulse 3s ease-in-out infinite;
+}
+
+.page-loader-glow-1 {
+  top: 25%;
+  left: 25%;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 60%);
+}
+
+.page-loader-glow-2 {
+  bottom: 25%;
+  right: 25%;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.05) 0%, transparent 60%);
+  animation-delay: 1s;
+}
+
+/* Content */
+.page-loader-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Logo */
+.page-loader-logo {
+  position: relative;
+  width: 16rem;
+  height: 5rem;
+  transition: transform 500ms ease-out, opacity 500ms ease-out;
+}
+
+.page-loader.exiting .page-loader-logo {
+  transform: scale(0.95);
+  opacity: 0;
+}
+
+/* Loading bar */
+.page-loader-bar-container {
+  width: 16rem;
+  height: 0.25rem;
+  background-color: rgb(17, 56, 89);
+  border-radius: 9999px;
+  overflow: hidden;
+  transition: opacity 500ms ease-out, transform 500ms ease-out;
+}
+
+.page-loader.exiting .page-loader-bar-container {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.page-loader-bar {
+  height: 100%;
+  background: linear-gradient(to right, rgb(245, 158, 11), rgb(251, 191, 36), rgb(245, 158, 11));
+  border-radius: 9999px;
+  transition: width 300ms ease-out;
+}
+
+/* Loading text */
+.page-loader-text {
+  color: rgb(168, 196, 207);
+  font-size: 0.875rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  transition: opacity 500ms ease-out;
+}
+
+.page-loader.exiting .page-loader-text {
+  opacity: 0;
+}

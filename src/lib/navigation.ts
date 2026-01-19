@@ -45,6 +45,21 @@ export function handleSectionNavigation(
     return;
   }
   
+  // If clicking "Home" (/) while already on home page, scroll to top
+  if (url.pathname === '/' && window.location.pathname === '/' && !hash) {
+    e.preventDefault();
+    
+    // Call the onNavigate callback (e.g., to close mobile menu)
+    onNavigate?.();
+    
+    // Small delay to ensure menu closes smoothly
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
+    
+    return;
+  }
+  
   // For non-hash links, let default behavior happen but call callback
   onNavigate?.();
 }

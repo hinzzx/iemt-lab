@@ -1,0 +1,206 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Base Styles
+   Core HTML element styles and resets
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Prevent iOS text size adjustment on orientation change */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Mobile touch optimization - eliminates 300ms tap delay */
+a,
+button,
+[role="button"],
+input,
+select,
+textarea,
+label,
+summary {
+  touch-action: manipulation;
+}
+
+body {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-regular);
+  line-height: var(--leading-relaxed);
+  letter-spacing: var(--tracking-wide);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Mobile scroll performance optimization */
+@media (max-width: 767px) {
+  html {
+    /* Improve scroll performance on mobile */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Ensure animations are GPU accelerated on mobile */
+  [data-animate] {
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}
+
+/* Maximum line length for body text */
+p {
+  max-width: 68ch;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TYPOGRAPHY STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* H1 — Hero / Page Title */
+.heading-h1 {
+  font-family: var(--font-display);
+  font-weight: var(--font-extrabold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  line-height: var(--leading-tight);
+  font-size: clamp(1.75rem, 8vw, 2.5rem);
+  color: var(--color-text-inverse);
+}
+
+@media (min-width: 768px) {
+  .heading-h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+  }
+}
+
+/* H2 — Section Headers */
+.heading-h2 {
+  font-family: var(--font-display);
+  font-weight: var(--font-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  line-height: var(--leading-snug);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  color: var(--color-text-inverse);
+}
+
+/* H3 — Subsection Headers */
+.heading-h3 {
+  font-family: var(--font-display);
+  font-weight: var(--font-semibold);
+  text-transform: capitalize;
+  letter-spacing: var(--tracking-wide);
+  line-height: 1.3;
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+  color: var(--color-text-inverse);
+}
+
+/* H4 — Tertiary Headers */
+.heading-h4 {
+  font-family: var(--font-display);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-normal);
+  line-height: 1.4;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  color: var(--color-text-inverse-muted);
+}
+
+/* Technical / Specification Data */
+.text-mono {
+  font-family: var(--font-mono);
+  font-weight: var(--font-medium);
+  font-size: 0.9375rem;
+  letter-spacing: 0;
+  line-height: var(--leading-normal);
+}
+
+/* Body Large (Lead Paragraphs) */
+.text-lead {
+  font-size: var(--text-lg);
+  font-weight: var(--font-regular);
+  line-height: 1.7;
+}
+
+/* Body Small */
+.text-small {
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLLBAR STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-navy-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-navy-600);
+  border-radius: 5px;
+  border: 2px solid var(--color-navy-900);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-navy-500);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOCUS STATES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.focus-ring {
+  transition: box-shadow var(--duration-short) ease,
+              outline var(--duration-short) ease;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-amber-500);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(191, 139, 75, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT MODE SECTION OVERRIDES
+   For sections that use light backgrounds (ice-100)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.section-light {
+  background: var(--color-bg-page);
+  color: var(--color-text-body);
+}
+
+.section-light .heading-h1,
+.section-light .heading-h2,
+.section-light .heading-h3 {
+  color: var(--color-text-primary);
+}
+
+.section-light .heading-h4 {
+  color: var(--color-text-secondary);
+}

@@ -60,14 +60,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, isLoading, children, disabled, ...props }, ref) => {
     return (
       <button
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, className }), "btn-shimmer")}
         ref={ref}
         disabled={disabled || isLoading}
         {...props}
       >
-        {/* Shimmer effect on hover */}
-        <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:translate-x-full transition-transform duration-700" />
-        
         {isLoading ? (
           <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
         ) : null}

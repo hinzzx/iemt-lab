@@ -1,7 +1,7 @@
 "use client";
 
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import type { HTMLAttributes, ReactNode, CSSProperties } from "react";
+import { useEffect, useRef, type HTMLAttributes, type ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 type AnimationType = 
   | "fade"
@@ -29,131 +29,59 @@ interface AnimatedProps extends HTMLAttributes<HTMLDivElement> {
   as?: "div" | "section" | "article" | "aside" | "span" | "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 }
 
-const getAnimationStyles = (
-  animation: AnimationType, 
-  isVisible: boolean, 
-  distance: number = 60
-): CSSProperties => {
-  // Optimized: Use only GPU-accelerated properties (transform, opacity)
-  // Avoid filter (blur) for better performance
-  const getTransform = (): CSSProperties => {
-    if (isVisible) {
-      return { 
-        opacity: 1, 
-        transform: "translate3d(0, 0, 0) scale3d(1, 1, 1)",
-      };
-    }
-
-    switch (animation) {
-      case "slide-up":
-        return { 
-          opacity: 0, 
-          transform: `translate3d(0, ${distance}px, 0)`,
-        };
-      case "slide-down":
-        return { 
-          opacity: 0, 
-          transform: `translate3d(0, -${distance}px, 0)`,
-        };
-      case "slide-left":
-        return { 
-          opacity: 0, 
-          transform: `translate3d(${distance}px, 0, 0)`,
-        };
-      case "slide-right":
-        return { 
-          opacity: 0, 
-          transform: `translate3d(-${distance}px, 0, 0)`,
-        };
-      case "zoom-in":
-        return { 
-          opacity: 0, 
-          transform: "scale3d(0.9, 0.9, 1)",
-        };
-      case "zoom-out":
-        return { 
-          opacity: 0, 
-          transform: "scale3d(1.1, 1.1, 1)",
-        };
-      case "flip-up":
-        return { 
-          opacity: 0, 
-          transform: `translate3d(0, ${distance * 0.7}px, 0) scale3d(0.95, 0.95, 1)`,
-        };
-      case "flip-left":
-        return { 
-          opacity: 0, 
-          transform: `translate3d(${distance * 0.7}px, 0, 0) scale3d(0.95, 0.95, 1)`,
-        };
-      case "rotate-in":
-        return { 
-          opacity: 0, 
-          transform: "scale3d(0.92, 0.92, 1)",
-        };
-      case "blur-in":
-        // Replaced blur with simple fade + slight movement for performance
-        return { 
-          opacity: 0, 
-          transform: `translate3d(0, ${distance * 0.4}px, 0)`,
-        };
-      case "bounce-in":
-        return { 
-          opacity: 0, 
-          transform: `translate3d(0, ${distance}px, 0) scale3d(0.96, 0.96, 1)`,
-        };
-      case "fade":
-        return { opacity: 0 };
-      case "none":
-      default:
-        return {};
-    }
-  };
-
-  return getTransform();
-};
-
 function Animated({
   children,
   animation = "slide-up",
   delay = 0,
-  duration = 700,
-  threshold = 0.1, // 10% visible - balanced visibility and performance
-  triggerOnce = true, // Default to true - animate in once, no animate out
-  distance = 50,
+  duration = 600,
+  threshold = 0.1,
+  triggerOnce = true,
+  distance = 30,
   className,
   as: Component = "div",
   style,
   ...props
 }: AnimatedProps) {
-  const { ref, isVisible } = useScrollAnimation<HTMLDivElement>({
-    threshold,
-    triggerOnce,
-    delay: 0, // Remove delay from observer, handle it in CSS
-  });
+  const ref = useRef<HTMLDivElement>(null);
 
-  const animationStyles = getAnimationStyles(animation, isVisible, distance);
-  
-  // Performance-optimized transitions using only GPU-accelerated properties
-  const combinedStyle: CSSProperties = {
-    ...animationStyles,
-    transitionProperty: "opacity, transform",
-    transitionDuration: `${duration}ms`,
-    transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)", // Smooth, premium easing
-    transitionDelay: isVisible ? `${delay}ms` : "0ms",
-    // CRITICAL: Keep willChange active to ensure smooth animations on mobile
-    // The browser needs this hint before the animation starts
-    willChange: "opacity, transform",
-    // Force GPU layer creation immediately
-    backfaceVisibility: "hidden" as const,
-    WebkitBackfaceVisibility: "hidden" as const,
-    ...style,
-  };
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || animation === "none") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          element.classList.add("is-visible");
+          if (triggerOnce) {
+            observer.unobserve(element);
+          }
+        } else if (!triggerOnce) {
+          element.classList.remove("is-visible");
+        }
+      },
+      { threshold }
+    );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [threshold, triggerOnce, animation]);
+
+  // Map animation types to CSS classes
+  const animationClass = animation !== "none" ? `scroll-${animation}` : "";
 
   return (
     <Component
       ref={ref}
-      className={className}
-      style={combinedStyle}
+      className={cn(animationClass, className)}
+      style={{
+        ...style,
+        "--scroll-delay": `${delay}ms`,
+        "--scroll-duration": `${duration}ms`,
+        "--scroll-distance": `${distance}px`,
+      } as React.CSSProperties}
       {...props}
     >
       {children}
@@ -176,41 +104,57 @@ function AnimatedGroup({
   children,
   animation = "slide-up",
   staggerDelay = 100,
-  duration = 700,
+  duration = 600,
   threshold = 0.1,
-  triggerOnce = true, // Default to true - animate in once, no animate out
-  distance = 50,
+  triggerOnce = true,
+  distance = 30,
   className,
   ...props
 }: AnimatedGroupProps) {
-  const { ref, isVisible } = useScrollAnimation<HTMLDivElement>({
-    threshold,
-    triggerOnce,
-  });
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          element.classList.add("is-visible");
+          if (triggerOnce) {
+            observer.unobserve(element);
+          }
+        } else if (!triggerOnce) {
+          element.classList.remove("is-visible");
+        }
+      },
+      { threshold }
+    );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [threshold, triggerOnce]);
+
+  const animationClass = animation !== "none" ? `scroll-${animation}` : "";
 
   return (
-    <div ref={ref} className={className} {...props}>
-      {children.map((child, index) => {
-        const animationStyles = getAnimationStyles(animation, isVisible, distance);
-        return (
-          <div
-            key={index}
-            style={{
-              ...animationStyles,
-              transitionProperty: "opacity, transform",
-              transitionDuration: `${duration}ms`,
-              transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
-              transitionDelay: isVisible ? `${index * staggerDelay}ms` : "0ms",
-              // Keep willChange active for smooth mobile performance
-              willChange: "opacity, transform",
-              backfaceVisibility: "hidden" as const,
-              WebkitBackfaceVisibility: "hidden" as const,
-            }}
-          >
-            {child}
-          </div>
-        );
-      })}
+    <div ref={ref} className={cn("scroll-group", className)} {...props}>
+      {children.map((child, index) => (
+        <div
+          key={index}
+          className={animationClass}
+          style={{
+            "--scroll-delay": `${index * staggerDelay}ms`,
+            "--scroll-duration": `${duration}ms`,
+            "--scroll-distance": `${distance}px`,
+          } as React.CSSProperties}
+        >
+          {child}
+        </div>
+      ))}
     </div>
   );
 }

@@ -158,44 +158,54 @@ const models = [
   },
 ];
 
-// Core components with positions mapped to the image lines
-// Using percentage positions relative to the image (top/left from image bounds)
-// Image aspect ratio is approximately 1.18:1 (width:height)
+// Core components with responsive positions for different screen sizes
+// Positions are percentage-based relative to the image container
 const coreComponents = [
   { 
     name: "Display", 
     description: "Digital dashboard",
-    // Top line - at the top of handlebars
-    top: 6,
-    left: 2,
+    // Responsive positioning: { mobile, tablet, desktop }
+    position: {
+      mobile: { top: 4, left: 1 },
+      tablet: { top: 5, left: 1.5 },
+      desktop: { top: 6, left: 2 },
+    }
   },
   { 
     name: "Charging Port", 
     description: "Universal connector",
-    // Second line - upper right area
-    top: 6,
-    left: 68,
+    position: {
+      mobile: { top: 4, left: 66 },
+      tablet: { top: 5, left: 67 },
+      desktop: { top: 6, left: 68 },
+    }
   },
   { 
     name: "ECU", 
     description: "Electronic Control Unit",
-    // Third line - middle left
-    top: 29,
-    left: 1,
+    position: {
+      mobile: { top: 27, left: -5 },
+      tablet: { top: 28, left: -30 },
+      desktop: { top: 29, left: 1 },
+    }
   },
   { 
     name: "Battery", 
     description: "High-density lithium-ion",
-    // Fourth line - lower left
-    top: 44,
-    left: 1,
+    position: {
+      mobile: { top: 42, left: -8.5 },
+      tablet: { top: 43, left: -27.5 },
+      desktop: { top: 44, left: 1 },
+    }
   },
   { 
     name: "Electric Motor", 
     description: "Mid-drive BLDC motor",
-    // Bottom line - bottom center-right
-    top: 86,
-    left: 58,
+    position: {
+      mobile: { top: 86, left: 63 },
+      tablet: { top: 86, left: 70 },
+      desktop: { top: 86, left: 58 },
+    }
   },
 ];
 
@@ -362,7 +372,7 @@ export default function ConvertedATVPage() {
                   priority
                 />
                 
-                {/* Component Labels - absolutely positioned over image */}
+                {/* Component Labels - absolutely positioned over image with responsive positioning */}
                 {coreComponents.map((component, index) => {
                   const isHighlighted = highlightedComponent === component.name;
                   return (
@@ -372,11 +382,19 @@ export default function ConvertedATVPage() {
                       delay={300 + index * 100}
                       duration={800}
                       triggerOnce
-                      className="absolute"
+                      className="absolute component-label"
                       style={{ 
-                        top: `${component.top}%`, 
-                        left: `${component.left}%`,
-                      }}
+                        // Default mobile positions
+                        top: `${component.position.mobile.top}%`, 
+                        left: `${component.position.mobile.left}%`,
+                        // CSS variables for responsive positioning
+                        '--mobile-top': `${component.position.mobile.top}%`,
+                        '--mobile-left': `${component.position.mobile.left}%`,
+                        '--tablet-top': `${component.position.tablet.top}%`,
+                        '--tablet-left': `${component.position.tablet.left}%`,
+                        '--desktop-top': `${component.position.desktop.top}%`,
+                        '--desktop-left': `${component.position.desktop.left}%`,
+                      } as React.CSSProperties}
                     >
                       <div className="group cursor-pointer">
                         <div className={`

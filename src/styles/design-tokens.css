@@ -1,0 +1,279 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   iEMT Lab Design Tokens
+   All CSS custom properties (variables) for the design system
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ═══════════════════════════════════════════
+     TYPOGRAPHY - Font Stacks
+     ═══════════════════════════════════════════ */
+  
+  --font-display: 'Montserrat', system-ui, -apple-system, sans-serif;
+  --font-body: 'Montserrat', 'Open Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Roboto Mono', 'SF Mono', monospace;
+
+  /* Typography Scale */
+  --text-xs: 0.75rem;      /* 12px — Fine print, badges */
+  --text-sm: 0.875rem;     /* 14px — Small body, captions */
+  --text-base: 1rem;       /* 16px — Body default */
+  --text-lg: 1.125rem;     /* 18px — Lead paragraphs */
+  --text-xl: 1.25rem;      /* 20px — H4, large body */
+  --text-2xl: 1.5rem;      /* 24px — H3 */
+  --text-3xl: 1.875rem;    /* 30px — H2 mobile */
+  --text-4xl: 2.25rem;     /* 36px — H2 desktop */
+  --text-5xl: 3rem;        /* 48px — H1 mobile */
+  --text-6xl: 4rem;        /* 64px — H1 desktop */
+
+  /* Font Weights */
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+
+  /* Line Heights */
+  --leading-none: 1;
+  --leading-tight: 1.1;
+  --leading-snug: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  /* Letter Spacing */
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.01em;
+  --tracking-wider: 0.03em;
+  --tracking-widest: 0.05em;
+
+  /* ═══════════════════════════════════════════
+     COLORS - Core Palette
+     ═══════════════════════════════════════════ */
+  
+  /* Navy Scale (Primary) */
+  --color-navy-900: #0A1F30;
+  --color-navy-800: #0F2D45;
+  --color-navy-700: #113859;   /* BASE — Primary brand */
+  --color-navy-600: #1A4A70;
+  --color-navy-500: #245D87;
+  --color-navy-400: #3A7199;
+  --color-navy-300: #5A8DAD;
+  --color-navy-200: #8EB1BF;   /* ICE-400 overlap */
+  --color-navy-100: #C5D9E2;
+  --color-navy-50: #E8F1F5;
+
+  /* Ice Scale (Secondary / Cool) */
+  --color-ice-500: #6A9AAC;
+  --color-ice-400: #8EB1BF;    /* BASE — Secondary cool */
+  --color-ice-300: #A8C4CF;
+  --color-ice-200: #C5D9E2;
+  --color-ice-100: #F2F2F2;    /* BASE — Page background */
+  --color-ice-50: #FAFAFA;
+
+  /* Earth Scale (Tertiary / Warm) */
+  --color-earth-600: #8A7A5E;
+  --color-earth-500: #97876A;
+  --color-earth-400: #A69576;  /* BASE — Heritage warmth */
+  --color-earth-300: #BEAB8F;
+  --color-earth-200: #D4C9B5;
+  --color-earth-100: #EBE6DC;
+
+  /* Amber Scale (Accent / Energy) */
+  --color-amber-700: #9A6B30;
+  --color-amber-600: #AC7B3E;
+  --color-amber-500: #BF8B4B;  /* BASE — Primary accent */
+  --color-amber-400: #CFA05F;
+  --color-amber-300: #DEB87C;
+  --color-amber-200: #EBCEA0;
+
+  /* ═══════════════════════════════════════════
+     SEMANTIC COLOR TOKENS
+     ═══════════════════════════════════════════ */
+  
+  /* Backgrounds */
+  --color-bg-page: #F2F2F2;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-surface-elevated: #FAFAFA;
+  --color-bg-inverse: #113859;
+  --color-bg-subtle: #E8F1F5;
+
+  /* Text */
+  --color-text-primary: #113859;
+  --color-text-secondary: #3A7199;
+  --color-text-body: #1A4A70;
+  --color-text-muted: #6A9AAC;
+  --color-text-inverse: #F2F2F2;
+  --color-text-inverse-muted: #8EB1BF;
+
+  /* Interactive */
+  --color-interactive-primary: #113859;
+  --color-interactive-primary-hover: #0F2D45;
+  --color-interactive-primary-active: #0A1F30;
+  --color-interactive-secondary: #BF8B4B;
+  --color-interactive-secondary-hover: #AC7B3E;
+
+  /* Borders */
+  --color-border-default: #C5D9E2;
+  --color-border-subtle: #E8F1F5;
+  --color-border-strong: #8EB1BF;
+  --color-border-focus: #BF8B4B;
+
+  /* ═══════════════════════════════════════════
+     FUNCTIONAL COLORS
+     ═══════════════════════════════════════════ */
+  
+  /* Cloud / Software */
+  --color-functional-cloud: #2EADD3;
+  --color-functional-cloud-light: #8EB1BF;
+
+  /* Eco / Conversion */
+  --color-functional-eco: #4CAF50;
+  --color-functional-eco-light: #81C784;
+
+  /* Power / Performance */
+  --color-functional-power: #FF6B35;
+  --color-functional-power-light: #FF8C5A;
+
+  /* ═══════════════════════════════════════════
+     STATUS COLORS
+     ═══════════════════════════════════════════ */
+  
+  --color-status-success: #4CAF50;
+  --color-status-warning: #F9A825;
+  --color-status-error: #E53935;
+  --color-status-info: #2196F3;
+
+  /* ═══════════════════════════════════════════
+     SPACING (4px base unit)
+     ═══════════════════════════════════════════ */
+  
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+  --space-32: 8rem;     /* 128px */
+
+  /* ═══════════════════════════════════════════
+     BORDER RADIUS
+     ═══════════════════════════════════════════ */
+  
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  /* ═══════════════════════════════════════════
+     SHADOWS (using navy-deep rgb: 17 56 89)
+     ═══════════════════════════════════════════ */
+  
+  --shadow-sm: 0 1px 2px 0 rgb(17 56 89 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(17 56 89 / 0.08), 
+               0 2px 4px -2px rgb(17 56 89 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(17 56 89 / 0.08), 
+               0 4px 6px -4px rgb(17 56 89 / 0.05);
+  --shadow-xl: 0 20px 25px -5px rgb(17 56 89 / 0.1), 
+               0 8px 10px -6px rgb(17 56 89 / 0.05);
+
+  /* ═══════════════════════════════════════════
+     TRANSITIONS & ANIMATIONS
+     ═══════════════════════════════════════════ */
+  
+  --duration-micro: 100ms;
+  --duration-short: 200ms;
+  --duration-medium: 300ms;
+  --duration-long: 500ms;
+  
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* ═══════════════════════════════════════════
+     Z-INDEX SCALE
+     ═══════════════════════════════════════════ */
+  
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-toast: 800;
+
+  /* ═══════════════════════════════════════════
+     ICON SIZES
+     ═══════════════════════════════════════════ */
+  
+  --icon-xs: 12px;
+  --icon-sm: 16px;
+  --icon-md: 24px;
+  --icon-lg: 32px;
+  --icon-xl: 48px;
+  --icon-2xl: 64px;
+}
+
+/* Tailwind v4 Theme Configuration */
+@theme inline {
+  /* Navy Scale */
+  --color-navy-900: var(--color-navy-900);
+  --color-navy-800: var(--color-navy-800);
+  --color-navy-700: var(--color-navy-700);
+  --color-navy-600: var(--color-navy-600);
+  --color-navy-500: var(--color-navy-500);
+  --color-navy-400: var(--color-navy-400);
+  --color-navy-300: var(--color-navy-300);
+  --color-navy-200: var(--color-navy-200);
+  --color-navy-100: var(--color-navy-100);
+  --color-navy-50: var(--color-navy-50);
+
+  /* Ice Scale */
+  --color-ice-500: var(--color-ice-500);
+  --color-ice-400: var(--color-ice-400);
+  --color-ice-300: var(--color-ice-300);
+  --color-ice-200: var(--color-ice-200);
+  --color-ice-100: var(--color-ice-100);
+  --color-ice-50: var(--color-ice-50);
+
+  /* Earth Scale */
+  --color-earth-600: var(--color-earth-600);
+  --color-earth-500: var(--color-earth-500);
+  --color-earth-400: var(--color-earth-400);
+  --color-earth-300: var(--color-earth-300);
+  --color-earth-200: var(--color-earth-200);
+  --color-earth-100: var(--color-earth-100);
+
+  /* Amber Scale */
+  --color-amber-700: var(--color-amber-700);
+  --color-amber-600: var(--color-amber-600);
+  --color-amber-500: var(--color-amber-500);
+  --color-amber-400: var(--color-amber-400);
+  --color-amber-300: var(--color-amber-300);
+  --color-amber-200: var(--color-amber-200);
+
+  /* Functional Colors */
+  --color-cloud: var(--color-functional-cloud);
+  --color-eco: var(--color-functional-eco);
+  --color-power: var(--color-functional-power);
+
+  /* Status Colors */
+  --color-success: var(--color-status-success);
+  --color-warning: var(--color-status-warning);
+  --color-error: var(--color-status-error);
+  --color-info: var(--color-status-info);
+
+  /* Font Families */
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}

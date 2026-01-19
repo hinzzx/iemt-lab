@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { CardDark, CardHeader, CardTitleDark, CardDescriptionDark, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,9 +54,10 @@ export function ProductsSection() {
           <Animated
             key={product.id}
             animation="slide-up"
-            delay={index * 100}
-            duration={600}
-            distance={40}
+            delay={index * 150}
+            duration={900}
+            distance={50}
+            triggerOnce
           >
             <CardDark className="group overflow-visible h-full flex flex-col relative mt-4 hover-lift">
               {/* Badge - positioned to overlap top edge */}
@@ -68,19 +68,13 @@ export function ProductsSection() {
                 {product.badge}
               </Badge>
 
-              {/* Image Container - Performance optimized with Next.js Image */}
+              {/* Image Container */}
               <div className="relative h-56 overflow-hidden rounded-t-xl">
-                <Image
-                  src={product.image}
-                  alt={product.title}
-                  fill
-                  className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  quality={85}
-                  loading="lazy"
+                <div 
+                  className="absolute inset-0 bg-center bg-cover transition-transform duration-700 group-hover:scale-110"
+                  style={{ backgroundImage: `url(${product.image})` }}
                 />
-                {/* Optimized overlay - less opacity change */}
-                <div className="absolute inset-0 bg-gradient-to-t from-navy-900/80 via-navy-900/20 to-transparent group-hover:from-navy-900/65 transition-[background-image] duration-200" />
+                <div className="absolute inset-0 bg-gradient-to-t from-navy-900/80 via-navy-900/20 to-transparent" />
               </div>
 
               <CardHeader className="relative">
