@@ -55,22 +55,48 @@ export function ContactSection() {
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission with cleanup
-    await new Promise(resolve => {
-      timeoutRef.current = setTimeout(resolve, 1500);
-    });
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    
-    // Reset after 3 seconds with cleanup
-    timeoutRef.current = setTimeout(() => {
-      setIsSubmitted(false);
-    }, 3000);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const data = {
+        firstName: formData.get("firstName"),
+        lastName: formData.get("lastName"),
+        email: formData.get("email"),
+        message: formData.get("message"),
+      };
+
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to send message");
+      }
+
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+
+      // Reset form
+      e.currentTarget.reset();
+
+      // Reset success message after 3 seconds
+      timeoutRef.current = setTimeout(() => {
+        setIsSubmitted(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setIsSubmitting(false);
+      alert("Failed to send message. Please try again or contact us directly.");
+    }
   };
 
   return (
@@ -105,12 +131,14 @@ export function ContactSection() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <Input
                     id="firstName"
+                    name="firstName"
                     label="First Name"
                     placeholder="John"
                     required
                   />
                   <Input
                     id="lastName"
+                    name="lastName"
                     label="Last Name"
                     placeholder="Doe"
                     required
@@ -119,6 +147,7 @@ export function ContactSection() {
 
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   label="Email"
                   placeholder="john@example.com"
@@ -127,6 +156,7 @@ export function ContactSection() {
 
                 <Textarea
                   id="message"
+                  name="message"
                   label="Message"
                   placeholder="Tell us about your project or inquiry..."
                   required

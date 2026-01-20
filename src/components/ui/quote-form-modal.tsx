@@ -48,45 +48,51 @@ export function QuoteFormModal({ isOpen, onClose }: QuoteFormModalProps) {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      firstName: formData.get("firstName"),
-      lastName: formData.get("lastName"),
-      email: formData.get("email"),
-      phone: formData.get("phone"),
-      country: formData.get("country"),
-      city: formData.get("city"),
-      zipcode: formData.get("zipcode"),
-      productType: formData.get("productType"),
-      subProductType: formData.get("subProductType"),
-      message: formData.get("message"),
-    };
+    try {
+      const formData = new FormData(e.currentTarget);
+      const data = {
+        firstName: formData.get("firstName"),
+        lastName: formData.get("lastName"),
+        email: formData.get("email"),
+        phone: formData.get("phone"),
+        country: formData.get("country"),
+        city: formData.get("city"),
+        zipcode: formData.get("zipcode"),
+        productType: formData.get("productType"),
+        subProductType: formData.get("subProductType"),
+        message: formData.get("message"),
+      };
 
-    // Create mailto link with form data
-    const subject = encodeURIComponent(`Quote Request - ${data.productType}`);
-    const body = encodeURIComponent(
-      `Name: ${data.firstName} ${data.lastName}\n` +
-      `Email: ${data.email}\n` +
-      `Phone: ${data.phone}\n` +
-      `Country: ${data.country}\n` +
-      `City: ${data.city}\n` +
-      `Zipcode: ${data.zipcode}\n` +
-      `Product Type: ${data.productType}\n` +
-      `Sub Product Type: ${data.subProductType}\n\n` +
-      `Message:\n${data.message}`
-    );
-    
-    const mailtoLink = `mailto:abvsuxhard@gmail.com?subject=${subject}&body=${body}`;
-    window.location.href = mailtoLink;
+      const response = await fetch("/api/quote", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+      const result = await response.json();
 
-    // Reset after 3 seconds and close modal with cleanup
-    timeoutRef.current = setTimeout(() => {
-      setIsSubmitted(false);
-      onClose();
-    }, 3000);
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to send quote request");
+      }
+
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+
+      // Reset form
+      e.currentTarget.reset();
+
+      // Close modal after 3 seconds
+      timeoutRef.current = setTimeout(() => {
+        setIsSubmitted(false);
+        onClose();
+      }, 3000);
+    } catch (error) {
+      console.error("Error submitting quote:", error);
+      setIsSubmitting(false);
+      alert("Failed to send quote request. Please try again or contact us directly.");
+    }
   };
 
   if (!isOpen) return null;
@@ -129,7 +135,7 @@ export function QuoteFormModal({ isOpen, onClose }: QuoteFormModalProps) {
                 </svg>
               </div>
               <h3 className="text-2xl font-bold text-ice-100 mb-3">Request Sent!</h3>
-              <p className="text-ice-400 max-w-sm">Your email client should open shortly. Please send the email to complete your quote request.</p>
+              <p className="text-ice-400 max-w-sm">Thank you for your quote request. Our team will review your information and get back to you within 24 hours.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">

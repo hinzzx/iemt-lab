@@ -204,7 +204,7 @@ const coreComponents = [
     position: {
       mobile: { top: 86, left: 63 },
       tablet: { top: 86, left: 70 },
-      desktop: { top: 86, left: 58 },
+      desktop: { top: 88, left: 64 },
     }
   },
 ];
