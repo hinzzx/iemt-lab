@@ -174,12 +174,12 @@ export async function POST(request: NextRequest) {
       { success: true, message: 'Quote request sent successfully' },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error sending quote email:', error);
     return NextResponse.json(
       { 
         error: 'Failed to send quote request', 
-        details: error.message || 'Unknown error' 
+        details: error instanceof Error ? error.message : 'Unknown error' 
       },
       { status: 500 }
     );
