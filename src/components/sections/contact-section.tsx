@@ -1,12 +1,21 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Animated } from "@/components/ui/animated";
+import {
+  validateContactForm,
+  EMAIL_REGEX,
+  VALIDATION_LIMITS,
+  type ContactFormData,
+} from "@/lib/validation";
+
+// Timeout for fetch requests (30 seconds)
+const FETCH_TIMEOUT_MS = 30000;
 
 const contactInfo = [
   {
@@ -44,28 +53,88 @@ const contactInfo = [
 export function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const isSubmittingRef = useRef(false); // Atomic lock for double-submit prevention
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      // Abort any in-flight request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // Atomic double-submit prevention
+    if (isSubmittingRef.current) {
+      return;
+    }
+    isSubmittingRef.current = true;
+    
+    // Abort any previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    
+    // Set up timeout
+    const timeoutId = setTimeout(() => {
+      abortController.abort();
+    }, FETCH_TIMEOUT_MS);
+
     setIsSubmitting(true);
+    setError(null);
 
     try {
       const formData = new FormData(e.currentTarget);
+      
+      // Check honeypot field for spam protection
+      const honeypot = formData.get("website");
+      if (honeypot) {
+        // Silently fail for bots
+        setIsSubmitting(false);
+        setIsSubmitted(true);
+        isSubmittingRef.current = false;
+        clearTimeout(timeoutId);
+        return;
+      }
+      
+      const rawData: ContactFormData = {
+        firstName: (formData.get("firstName") as string) || "",
+        lastName: (formData.get("lastName") as string) || "",
+        email: (formData.get("email") as string) || "",
+        message: (formData.get("message") as string) || "",
+      };
+      
+      // Client-side validation using shared validation
+      const validationErrors = validateContactForm(rawData);
+      if (validationErrors.length > 0) {
+        setError(validationErrors.map(e => e.message).join(". "));
+        setIsSubmitting(false);
+        isSubmittingRef.current = false;
+        clearTimeout(timeoutId);
+        return;
+      }
+      
+      // Sanitize data (trim whitespace)
       const data = {
-        firstName: formData.get("firstName"),
-        lastName: formData.get("lastName"),
-        email: formData.get("email"),
-        message: formData.get("message"),
+        firstName: rawData.firstName.trim(),
+        lastName: rawData.lastName.trim(),
+        email: rawData.email.trim().toLowerCase(),
+        message: rawData.message.trim(),
       };
 
       const response = await fetch("/api/contact", {
@@ -74,30 +143,67 @@ export function ContactSection() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
+        signal: abortController.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const result = await response.json();
 
       if (!response.ok) {
+        // Handle rate limiting
+        if (response.status === 429) {
+          const retryAfter = result.retryAfter || 60;
+          throw new Error(`Too many requests. Please try again in ${retryAfter} seconds.`);
+        }
         throw new Error(result.error || "Failed to send message");
       }
 
       setIsSubmitting(false);
       setIsSubmitted(true);
 
-      // Reset form
-      e.currentTarget.reset();
+      // Reset form using ref
+      formRef.current?.reset();
 
+      // Clear any existing timeout before setting new one
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
       // Reset success message after 3 seconds
       timeoutRef.current = setTimeout(() => {
         setIsSubmitted(false);
       }, 3000);
-    } catch (error) {
-      console.error("Error submitting form:", error);
+    } catch (err) {
+      clearTimeout(timeoutId);
+      
+      // Don't update state if request was aborted (component unmounting or timeout)
+      if (err instanceof Error && err.name === 'AbortError') {
+        // Check if it was a timeout vs user-initiated abort
+        if (abortControllerRef.current === abortController) {
+          setError("Request timed out. Please check your connection and try again.");
+          setIsSubmitting(false);
+        }
+        // If controller changed, component is unmounting or new request started - don't update state
+        isSubmittingRef.current = false;
+        return;
+      }
+
+      console.error("Error submitting form:", err);
       setIsSubmitting(false);
-      alert("Failed to send message. Please try again or contact us directly.");
+      
+      // Differentiate error types
+      if (err instanceof TypeError) {
+        setError("Network error. Please check your connection and try again.");
+      } else if (err instanceof Error) {
+        setError(err.message || "Failed to send message. Please try again.");
+      } else {
+        setError("Failed to send message. Please try again or contact us directly.");
+      }
+    } finally {
+      isSubmittingRef.current = false;
     }
-  };
+  }, []);
 
   return (
     <Section id="contact" variant="default">
@@ -127,7 +233,33 @@ export function ContactSection() {
                 </div>
               </Animated>
             ) : (
-              <form onSubmit={handleSubmit} className="relative space-y-6">
+              <form ref={formRef} onSubmit={handleSubmit} className="relative space-y-6">
+                {/* Inline error message */}
+                {error && (
+                  <div 
+                    role="alert" 
+                    aria-live="polite"
+                    className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+                  >
+                    <div className="flex items-start gap-3">
+                      <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>{error}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Honeypot field for spam protection - hidden from real users */}
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="absolute -left-[9999px] h-0 w-0 overflow-hidden"
+                />
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <Input
                     id="firstName"
@@ -135,6 +267,10 @@ export function ContactSection() {
                     label="First Name"
                     placeholder="John"
                     required
+                    disabled={isSubmitting}
+                    autoComplete="given-name"
+                    minLength={VALIDATION_LIMITS.NAME_MIN_LENGTH}
+                    maxLength={VALIDATION_LIMITS.NAME_MAX_LENGTH}
                   />
                   <Input
                     id="lastName"
@@ -142,6 +278,10 @@ export function ContactSection() {
                     label="Last Name"
                     placeholder="Doe"
                     required
+                    disabled={isSubmitting}
+                    autoComplete="family-name"
+                    minLength={VALIDATION_LIMITS.NAME_MIN_LENGTH}
+                    maxLength={VALIDATION_LIMITS.NAME_MAX_LENGTH}
                   />
                 </div>
 
@@ -152,6 +292,9 @@ export function ContactSection() {
                   label="Email"
                   placeholder="john@example.com"
                   required
+                  disabled={isSubmitting}
+                  autoComplete="email"
+                  pattern={EMAIL_REGEX.source}
                 />
 
                 <Textarea
@@ -160,6 +303,9 @@ export function ContactSection() {
                   label="Message"
                   placeholder="Tell us about your project or inquiry..."
                   required
+                  disabled={isSubmitting}
+                  minLength={VALIDATION_LIMITS.MESSAGE_MIN_LENGTH}
+                  maxLength={VALIDATION_LIMITS.MESSAGE_MAX_LENGTH}
                 />
 
                 <Button
@@ -168,6 +314,7 @@ export function ContactSection() {
                   size="lg"
                   className="w-full hover-icon-shift press-effect"
                   isLoading={isSubmitting}
+                  disabled={isSubmitting}
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}
                   {!isSubmitting && (

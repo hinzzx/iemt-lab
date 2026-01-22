@@ -1,15 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MailerSend, EmailParams, Sender, Recipient } from 'mailersend';
+import {
+  validateQuoteForm,
+  escapeHtml,
+  escapeHtmlWithLineBreaks,
+  checkRateLimit,
+  getClientIp,
+  type QuoteFormData,
+} from '@/lib/validation';
 
 // Initialize MailerSend client
 const mailerSend = new MailerSend({
   apiKey: process.env.MAILERSEND_API_KEY || '',
 });
 
+// Rate limit configuration
+const RATE_LIMIT_MAX_REQUESTS = 3; // 3 requests (quote requests are more valuable)
+const RATE_LIMIT_WINDOW_MS = 60000; // per minute
+
 export async function POST(request: NextRequest) {
   try {
+    // Get client IP for rate limiting
+    const clientIp = getClientIp(request.headers);
+    
+    // Check rate limit
+    const rateLimitResult = checkRateLimit(
+      `quote:${clientIp}`,
+      RATE_LIMIT_MAX_REQUESTS,
+      RATE_LIMIT_WINDOW_MS
+    );
+
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { 
+          error: 'Too many requests. Please try again later.',
+          retryAfter: rateLimitResult.resetIn,
+        },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': String(rateLimitResult.resetIn),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(rateLimitResult.resetIn),
+          },
+        }
+      );
+    }
+
     // Parse the request body
-    const body = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
+
+    // Type check the body
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json(
+        { error: 'Request body must be an object' },
+        { status: 400 }
+      );
+    }
+
     const { 
       firstName, 
       lastName, 
@@ -21,22 +77,55 @@ export async function POST(request: NextRequest) {
       productType, 
       subProductType, 
       message 
-    } = body;
+    } = body as Record<string, unknown>;
 
-    // Validate required fields
-    if (!firstName || !lastName || !email || !phone || !country || !city || !zipcode || !productType || !subProductType || !message) {
+    // Prepare form data for validation
+    const formData: QuoteFormData = {
+      firstName: typeof firstName === 'string' ? firstName : '',
+      lastName: typeof lastName === 'string' ? lastName : '',
+      email: typeof email === 'string' ? email : '',
+      phone: typeof phone === 'string' ? phone : '',
+      country: typeof country === 'string' ? country : '',
+      city: typeof city === 'string' ? city : '',
+      zipcode: typeof zipcode === 'string' ? zipcode : '',
+      productType: typeof productType === 'string' ? productType : '',
+      subProductType: typeof subProductType === 'string' ? subProductType : '',
+      message: typeof message === 'string' ? message : '',
+    };
+
+    // Server-side validation (mirrors client-side)
+    const validationErrors = validateQuoteForm(formData);
+    if (validationErrors.length > 0) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { 
+          error: 'Validation failed',
+          details: validationErrors,
+        },
         { status: 400 }
       );
     }
 
+    // Sanitize data
+    const sanitizedData = {
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      email: formData.email.trim().toLowerCase(),
+      phone: formData.phone.trim(),
+      country: formData.country.trim(),
+      city: formData.city.trim(),
+      zipcode: formData.zipcode.trim(),
+      productType: formData.productType.trim(),
+      subProductType: formData.subProductType.trim(),
+      message: formData.message.trim(),
+    };
+
     // Validate API key
-    if (!process.env.MAILERSEND_API_KEY || process.env.MAILERSEND_API_KEY === 'your_api_key_here') {
-      console.error('MailerSend API key not configured');
+    const apiKey = process.env.MAILERSEND_API_KEY;
+    if (!apiKey || apiKey === 'your_api_key_here' || apiKey === 'your_actual_api_key_here') {
+      console.error('MailerSend API key not configured. Key exists:', !!apiKey, 'Key length:', apiKey?.length || 0);
       return NextResponse.json(
-        { error: 'Email service not configured' },
-        { status: 500 }
+        { error: 'Email service is temporarily unavailable' },
+        { status: 503 }
       );
     }
 
@@ -53,12 +142,24 @@ export async function POST(request: NextRequest) {
       ),
     ];
 
-    // Create email content
+    // Escape user input for HTML email (XSS prevention)
+    const safeFirstName = escapeHtml(sanitizedData.firstName);
+    const safeLastName = escapeHtml(sanitizedData.lastName);
+    const safeEmail = escapeHtml(sanitizedData.email);
+    const safePhone = escapeHtml(sanitizedData.phone);
+    const safeCountry = escapeHtml(sanitizedData.country);
+    const safeCity = escapeHtml(sanitizedData.city);
+    const safeZipcode = escapeHtml(sanitizedData.zipcode);
+    const safeProductType = escapeHtml(sanitizedData.productType);
+    const safeSubProductType = escapeHtml(sanitizedData.subProductType);
+    const safeMessage = escapeHtmlWithLineBreaks(sanitizedData.message);
+
+    // Create email content with escaped values
     const emailParams = new EmailParams()
       .setFrom(sentFrom)
       .setTo(recipients)
-      .setReplyTo({ email, name: `${firstName} ${lastName}` })
-      .setSubject(`New Quote Request: ${productType} - ${subProductType}`)
+      .setReplyTo({ email: sanitizedData.email, name: `${sanitizedData.firstName} ${sanitizedData.lastName}` })
+      .setSubject(`New Quote Request: ${sanitizedData.productType} - ${sanitizedData.subProductType}`)
       .setHtml(`
         <!DOCTYPE html>
         <html>
@@ -89,15 +190,15 @@ export async function POST(request: NextRequest) {
                   <div class="section-title">Customer Information</div>
                   <div class="field">
                     <div class="label">Name:</div>
-                    <div class="value">${firstName} ${lastName}</div>
+                    <div class="value">${safeFirstName} ${safeLastName}</div>
                   </div>
                   <div class="field">
                     <div class="label">Email:</div>
-                    <div class="value"><a href="mailto:${email}">${email}</a></div>
+                    <div class="value"><a href="mailto:${safeEmail}">${safeEmail}</a></div>
                   </div>
                   <div class="field">
                     <div class="label">Phone:</div>
-                    <div class="value"><a href="tel:${phone}">${phone}</a></div>
+                    <div class="value"><a href="tel:${safePhone}">${safePhone}</a></div>
                   </div>
                 </div>
 
@@ -105,15 +206,15 @@ export async function POST(request: NextRequest) {
                   <div class="section-title">Location</div>
                   <div class="field">
                     <div class="label">Country:</div>
-                    <div class="value">${country}</div>
+                    <div class="value">${safeCountry}</div>
                   </div>
                   <div class="field">
                     <div class="label">City:</div>
-                    <div class="value">${city}</div>
+                    <div class="value">${safeCity}</div>
                   </div>
                   <div class="field">
                     <div class="label">Zipcode:</div>
-                    <div class="value">${zipcode}</div>
+                    <div class="value">${safeZipcode}</div>
                   </div>
                 </div>
 
@@ -121,23 +222,23 @@ export async function POST(request: NextRequest) {
                   <div class="section-title">Product Interest</div>
                   <div class="field">
                     <div class="label">Product Type:</div>
-                    <div class="value"><strong>${productType}</strong></div>
+                    <div class="value"><strong>${safeProductType}</strong></div>
                   </div>
                   <div class="field">
                     <div class="label">Sub Product Type:</div>
-                    <div class="value"><strong>${subProductType}</strong></div>
+                    <div class="value"><strong>${safeSubProductType}</strong></div>
                   </div>
                 </div>
 
                 <div class="section">
                   <div class="section-title">Customer Message</div>
-                  <div class="message-box">${message}</div>
+                  <div class="message-box">${safeMessage}</div>
                 </div>
 
                 <div class="footer">
                   <p><strong>This is a quote request from the IEMT Lab website</strong></p>
                   <p>Please respond within 24 hours</p>
-                  <p>Reply directly to this email to respond to ${firstName}</p>
+                  <p>Reply directly to this email to respond to ${safeFirstName}</p>
                 </div>
               </div>
             </div>
@@ -147,20 +248,20 @@ export async function POST(request: NextRequest) {
       .setText(`
         New Quote Request
         
-        Product: ${productType} - ${subProductType}
+        Product: ${sanitizedData.productType} - ${sanitizedData.subProductType}
         
         CUSTOMER INFORMATION
-        Name: ${firstName} ${lastName}
-        Email: ${email}
-        Phone: ${phone}
+        Name: ${sanitizedData.firstName} ${sanitizedData.lastName}
+        Email: ${sanitizedData.email}
+        Phone: ${sanitizedData.phone}
         
         LOCATION
-        Country: ${country}
-        City: ${city}
-        Zipcode: ${zipcode}
+        Country: ${sanitizedData.country}
+        City: ${sanitizedData.city}
+        Zipcode: ${sanitizedData.zipcode}
         
         MESSAGE
-        ${message}
+        ${sanitizedData.message}
         
         ---
         This is a quote request from the IEMT Lab website
@@ -172,15 +273,20 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { success: true, message: 'Quote request sent successfully' },
-      { status: 200 }
+      { 
+        status: 200,
+        headers: {
+          'X-RateLimit-Remaining': String(rateLimitResult.remaining),
+        },
+      }
     );
   } catch (error: unknown) {
+    // Log the full error server-side for debugging
     console.error('Error sending quote email:', error);
+    
+    // Return generic error to client (don't expose implementation details)
     return NextResponse.json(
-      { 
-        error: 'Failed to send quote request', 
-        details: error instanceof Error ? error.message : 'Unknown error' 
-      },
+      { error: 'Failed to send quote request. Please try again later.' },
       { status: 500 }
     );
   }

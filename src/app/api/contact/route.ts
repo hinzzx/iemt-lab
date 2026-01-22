@@ -1,31 +1,108 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MailerSend, EmailParams, Sender, Recipient } from 'mailersend';
+import {
+  validateContactForm,
+  escapeHtml,
+  escapeHtmlWithLineBreaks,
+  checkRateLimit,
+  getClientIp,
+  type ContactFormData,
+} from '@/lib/validation';
 
 // Initialize MailerSend client
 const mailerSend = new MailerSend({
   apiKey: process.env.MAILERSEND_API_KEY || '',
 });
 
+// Rate limit configuration
+const RATE_LIMIT_MAX_REQUESTS = 5; // 5 requests
+const RATE_LIMIT_WINDOW_MS = 60000; // per minute
+
 export async function POST(request: NextRequest) {
   try {
-    // Parse the request body
-    const body = await request.json();
-    const { firstName, lastName, email, message } = body;
+    // Get client IP for rate limiting
+    const clientIp = getClientIp(request.headers);
+    
+    // Check rate limit
+    const rateLimitResult = checkRateLimit(
+      `contact:${clientIp}`,
+      RATE_LIMIT_MAX_REQUESTS,
+      RATE_LIMIT_WINDOW_MS
+    );
 
-    // Validate required fields
-    if (!firstName || !lastName || !email || !message) {
+    if (!rateLimitResult.allowed) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { 
+          error: 'Too many requests. Please try again later.',
+          retryAfter: rateLimitResult.resetIn,
+        },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': String(rateLimitResult.resetIn),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(rateLimitResult.resetIn),
+          },
+        }
+      );
+    }
+
+    // Parse the request body
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
         { status: 400 }
       );
     }
 
-    // Validate API key
-    if (!process.env.MAILERSEND_API_KEY || process.env.MAILERSEND_API_KEY === 'your_api_key_here') {
-      console.error('MailerSend API key not configured');
+    // Type check the body
+    if (!body || typeof body !== 'object') {
       return NextResponse.json(
-        { error: 'Email service not configured' },
-        { status: 500 }
+        { error: 'Request body must be an object' },
+        { status: 400 }
+      );
+    }
+
+    const { firstName, lastName, email, message } = body as Record<string, unknown>;
+
+    // Prepare form data for validation
+    const formData: ContactFormData = {
+      firstName: typeof firstName === 'string' ? firstName : '',
+      lastName: typeof lastName === 'string' ? lastName : '',
+      email: typeof email === 'string' ? email : '',
+      message: typeof message === 'string' ? message : '',
+    };
+
+    // Server-side validation (mirrors client-side)
+    const validationErrors = validateContactForm(formData);
+    if (validationErrors.length > 0) {
+      return NextResponse.json(
+        { 
+          error: 'Validation failed',
+          details: validationErrors,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize data
+    const sanitizedData = {
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      email: formData.email.trim().toLowerCase(),
+      message: formData.message.trim(),
+    };
+
+    // Validate API key
+    const apiKey = process.env.MAILERSEND_API_KEY;
+    if (!apiKey || apiKey === 'your_api_key_here' || apiKey === 'your_actual_api_key_here') {
+      console.error('MailerSend API key not configured. Key exists:', !!apiKey, 'Key length:', apiKey?.length || 0);
+      return NextResponse.json(
+        { error: 'Email service is temporarily unavailable' },
+        { status: 503 }
       );
     }
 
@@ -42,12 +119,18 @@ export async function POST(request: NextRequest) {
       ),
     ];
 
-    // Create email content
+    // Escape user input for HTML email (XSS prevention)
+    const safeFirstName = escapeHtml(sanitizedData.firstName);
+    const safeLastName = escapeHtml(sanitizedData.lastName);
+    const safeEmail = escapeHtml(sanitizedData.email);
+    const safeMessage = escapeHtmlWithLineBreaks(sanitizedData.message);
+
+    // Create email content with escaped values
     const emailParams = new EmailParams()
       .setFrom(sentFrom)
       .setTo(recipients)
-      .setReplyTo({ email, name: `${firstName} ${lastName}` })
-      .setSubject(`New Contact Form Submission from ${firstName} ${lastName}`)
+      .setReplyTo({ email: sanitizedData.email, name: `${sanitizedData.firstName} ${sanitizedData.lastName}` })
+      .setSubject(`New Contact Form Submission from ${sanitizedData.firstName} ${sanitizedData.lastName}`)
       .setHtml(`
         <!DOCTYPE html>
         <html>
@@ -71,19 +154,19 @@ export async function POST(request: NextRequest) {
               <div class="content">
                 <div class="field">
                   <div class="label">From:</div>
-                  <div class="value">${firstName} ${lastName}</div>
+                  <div class="value">${safeFirstName} ${safeLastName}</div>
                 </div>
                 <div class="field">
                   <div class="label">Email:</div>
-                  <div class="value"><a href="mailto:${email}">${email}</a></div>
+                  <div class="value"><a href="mailto:${safeEmail}">${safeEmail}</a></div>
                 </div>
                 <div class="field">
                   <div class="label">Message:</div>
-                  <div class="value">${message.replace(/\n/g, '<br>')}</div>
+                  <div class="value">${safeMessage}</div>
                 </div>
                 <div class="footer">
                   <p>This email was sent from the IEMT Lab contact form</p>
-                  <p>Reply directly to this email to respond to ${firstName}</p>
+                  <p>Reply directly to this email to respond to ${safeFirstName}</p>
                 </div>
               </div>
             </div>
@@ -93,11 +176,11 @@ export async function POST(request: NextRequest) {
       .setText(`
         New Contact Form Submission
         
-        From: ${firstName} ${lastName}
-        Email: ${email}
+        From: ${sanitizedData.firstName} ${sanitizedData.lastName}
+        Email: ${sanitizedData.email}
         
         Message:
-        ${message}
+        ${sanitizedData.message}
         
         ---
         This email was sent from the IEMT Lab contact form
@@ -108,15 +191,20 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { success: true, message: 'Email sent successfully' },
-      { status: 200 }
+      { 
+        status: 200,
+        headers: {
+          'X-RateLimit-Remaining': String(rateLimitResult.remaining),
+        },
+      }
     );
   } catch (error: unknown) {
+    // Log the full error server-side for debugging
     console.error('Error sending email:', error);
+    
+    // Return generic error to client (don't expose implementation details)
     return NextResponse.json(
-      { 
-        error: 'Failed to send email', 
-        details: error instanceof Error ? error.message : 'Unknown error' 
-      },
+      { error: 'Failed to send message. Please try again later.' },
       { status: 500 }
     );
   }
