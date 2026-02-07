@@ -1,16 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Animated } from "@/components/ui/animated";
 import { Section, SectionHeader } from "@/components/ui/section";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { PageLoader } from "@/components/ui/page-loader";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { handleSectionNavigation, handleInitialHash } from "@/lib/navigation";
+import {
+  validateContactForm,
+  EMAIL_REGEX,
+  VALIDATION_LIMITS,
+  type ContactFormData,
+} from "@/lib/validation";
 
 const features = [
   {
@@ -218,16 +226,282 @@ const criticalImages = [
   "/logos/full_transparent.svg",
 ];
 
+// Timeout for fetch requests (30 seconds)
+const FETCH_TIMEOUT_MS = 30000;
+
+function ConversionInquirySection() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const isSubmittingRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+    
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    
+    const timeoutId = setTimeout(() => {
+      abortController.abort();
+    }, FETCH_TIMEOUT_MS);
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      
+      const honeypot = formData.get("website");
+      if (honeypot) {
+        setIsSubmitting(false);
+        setIsSubmitted(true);
+        isSubmittingRef.current = false;
+        clearTimeout(timeoutId);
+        return;
+      }
+      
+      const rawData: ContactFormData = {
+        firstName: (formData.get("firstName") as string) || "",
+        lastName: (formData.get("lastName") as string) || "",
+        email: (formData.get("email") as string) || "",
+        message: (formData.get("message") as string) || "",
+      };
+      
+      const validationErrors = validateContactForm(rawData);
+      if (validationErrors.length > 0) {
+        setError(validationErrors.map(e => e.message).join(". "));
+        setIsSubmitting(false);
+        isSubmittingRef.current = false;
+        clearTimeout(timeoutId);
+        return;
+      }
+      
+      const data = {
+        firstName: rawData.firstName.trim(),
+        lastName: rawData.lastName.trim(),
+        email: rawData.email.trim().toLowerCase(),
+        message: `[ATV Conversion Inquiry]\n\n${rawData.message.trim()}`,
+      };
+
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        signal: abortController.signal,
+      });
+
+      clearTimeout(timeoutId);
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          const retryAfter = result.retryAfter || 60;
+          throw new Error(`Too many requests. Please try again in ${retryAfter} seconds.`);
+        }
+        throw new Error(result.error || "Failed to send message");
+      }
+
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+      formRef.current?.reset();
+
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        setIsSubmitted(false);
+      }, 3000);
+    } catch (err) {
+      clearTimeout(timeoutId);
+      
+      if (err instanceof Error && err.name === 'AbortError') {
+        if (abortControllerRef.current === abortController) {
+          setError("Request timed out. Please check your connection and try again.");
+          setIsSubmitting(false);
+        }
+        isSubmittingRef.current = false;
+        return;
+      }
+
+      console.error("Error submitting form:", err);
+      setIsSubmitting(false);
+      
+      if (err instanceof TypeError) {
+        setError("Network error. Please check your connection and try again.");
+      } else if (err instanceof Error) {
+        setError(err.message || "Failed to send message. Please try again.");
+      } else {
+        setError("Failed to send message. Please try again or contact us directly.");
+      }
+    } finally {
+      isSubmittingRef.current = false;
+    }
+  }, []);
+
+  return (
+    <Section id="conversion-inquiry" variant="dark">
+      <SectionHeader
+        badge="Get Started"
+        title="Request a Conversion"
+        subtitle="Interested in converting your ATV to electric? Tell us about your project and we'll get back to you with a custom plan."
+      />
+
+      <div className="max-w-2xl mx-auto">
+        <Animated animation="slide-up" duration={700} distance={50}>
+          <div className="relative bg-navy-700/65 border border-ice-300/20 rounded-xl p-8 overflow-hidden shadow-lg shadow-navy-900/30">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-power/[0.05] to-transparent rounded-bl-full pointer-events-none" />
+            
+            {isSubmitted ? (
+              <Animated animation="fade" duration={400}>
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-20 h-20 mb-8 rounded-full bg-gradient-to-br from-eco/20 to-eco/5 flex items-center justify-center">
+                    <svg className="w-10 h-10 text-eco" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-ice-100 mb-3">Inquiry Sent!</h3>
+                  <p className="text-ice-400 max-w-sm">Thanks for your interest in ATV conversion. We&apos;ll get back to you with a custom plan.</p>
+                </div>
+              </Animated>
+            ) : (
+              <form ref={formRef} onSubmit={handleSubmit} className="relative space-y-6">
+                {error && (
+                  <div 
+                    role="alert" 
+                    aria-live="polite"
+                    className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+                  >
+                    <div className="flex items-start gap-3">
+                      <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>{error}</span>
+                    </div>
+                  </div>
+                )}
+
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="absolute -left-[9999px] h-0 w-0 overflow-hidden"
+                />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <Input
+                    id="conv-firstName"
+                    name="firstName"
+                    label="First Name"
+                    placeholder="John"
+                    required
+                    disabled={isSubmitting}
+                    autoComplete="given-name"
+                    minLength={VALIDATION_LIMITS.NAME_MIN_LENGTH}
+                    maxLength={VALIDATION_LIMITS.NAME_MAX_LENGTH}
+                  />
+                  <Input
+                    id="conv-lastName"
+                    name="lastName"
+                    label="Last Name"
+                    placeholder="Doe"
+                    required
+                    disabled={isSubmitting}
+                    autoComplete="family-name"
+                    minLength={VALIDATION_LIMITS.NAME_MIN_LENGTH}
+                    maxLength={VALIDATION_LIMITS.NAME_MAX_LENGTH}
+                  />
+                </div>
+
+                <Input
+                  id="conv-email"
+                  name="email"
+                  type="email"
+                  label="Email"
+                  placeholder="john@example.com"
+                  required
+                  disabled={isSubmitting}
+                  autoComplete="email"
+                  pattern={EMAIL_REGEX.source}
+                />
+
+                <Textarea
+                  id="conv-message"
+                  name="message"
+                  label="Tell us about your ATV"
+                  placeholder="Describe your ATV (make, model, year) and what you're looking for in a conversion..."
+                  required
+                  disabled={isSubmitting}
+                  minLength={VALIDATION_LIMITS.MESSAGE_MIN_LENGTH}
+                  maxLength={VALIDATION_LIMITS.MESSAGE_MAX_LENGTH}
+                />
+
+                <Button
+                  type="submit"
+                  variant="power"
+                  size="lg"
+                  className="w-full hover-icon-shift press-effect"
+                  isLoading={isSubmitting}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Sending..." : "Send Conversion Inquiry"}
+                  {!isSubmitting && (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  )}
+                </Button>
+              </form>
+            )}
+          </div>
+        </Animated>
+      </div>
+    </Section>
+  );
+}
+
 export default function ConvertedATVPage() {
   const [highlightedComponent, setHighlightedComponent] = useState<string | null>(null);
+  const highlightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleComponentHighlight = (componentName: string) => {
+  // Cleanup highlight timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleComponentHighlight = useCallback((componentName: string) => {
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current);
+    }
     setHighlightedComponent(componentName);
-    // Auto-clear highlight after 1 second
-    setTimeout(() => {
+    highlightTimeoutRef.current = setTimeout(() => {
       setHighlightedComponent(null);
     }, 1000);
-  };
+  }, []);
 
   // Handle hash navigation on initial page load
   useEffect(() => {
@@ -689,23 +963,34 @@ export default function ConvertedATVPage() {
           </div>
         </Section>
 
-        {/* CTA Section */}
+        {/* Conversion Inquiry Form Section */}
+        <ConversionInquirySection />
+
+        {/* CTA Section - Products Link */}
         <Section variant="gradient">
           <div className="text-center max-w-3xl mx-auto">
             <Animated animation="slide-up" duration={1000} triggerOnce>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-ice-100 uppercase tracking-wider mb-6">
-                Ready to Go Electric?
+                Looking for a Ready-Made ATV?
               </h2>
               <p className="text-lg text-ice-400 mb-10">
-                Contact us today for a custom quote on your ATV conversion. Our team will guide you through every step of the process.
+                Check out our lineup of purpose-built electric ATVs, available for purchase in our shop. No conversion needed — just ride.
               </p>
             </Animated>
             
             <Animated animation="zoom-in" delay={200} duration={900} triggerOnce>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/#contact" onClick={(e) => handleSectionNavigation(e, "/#contact")}>
+                <a href="https://store.iemt-lab.com" target="_blank" rel="noopener noreferrer">
                   <Button variant="secondary" size="xl" className="hover-icon-shift animate-glow-slow text-sm sm:text-base">
-                    <span>Get a Quote</span>
+                    <span>Visit Our Shop</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </Button>
+                </a>
+                <Link href="/#products" onClick={(e) => handleSectionNavigation(e, "/#products")}>
+                  <Button variant="power" size="xl" className="hover-icon-shift text-sm sm:text-base">
+                    <span>View Products</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>

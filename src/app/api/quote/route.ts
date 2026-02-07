@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
     // Validate API key
     const apiKey = process.env.MAILERSEND_API_KEY;
     if (!apiKey || apiKey === 'your_api_key_here' || apiKey === 'your_actual_api_key_here') {
-      console.error('MailerSend API key not configured. Key exists:', !!apiKey, 'Key length:', apiKey?.length || 0);
+      console.error('MailerSend API key not configured');
       return NextResponse.json(
         { error: 'Email service is temporarily unavailable' },
         { status: 503 }

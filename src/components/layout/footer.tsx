@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { Animated } from "@/components/ui/animated";
 import { handleSectionNavigation } from "@/lib/navigation";
@@ -8,13 +9,20 @@ const footerLinks = {
   main: [
     { name: "Home", href: "/#home" },
     { name: "Products", href: "/#products" },
+    { name: "Services", href: "/#services" },
     { name: "About", href: "/#about" },
     { name: "Contact", href: "/#contact" },
   ],
   products: [
-    { name: "Electric ATV", href: "/converted-atv" },
-    { name: "KangoZE Enhanced", href: "/kangoze-enhanced" },
-    { name: "Converted Vehicles", href: "/converted-vehicles" },
+    { name: "EonTrail ATV", href: "https://store.iemt-lab.com/products/eontrail-electric-atv" },
+    { name: "HyperGlide ATV", href: "https://store.iemt-lab.com/products/hyperglide-electric-atv" },
+    { name: "TitanVolt ATV", href: "https://store.iemt-lab.com/products/titanvolt-electric-atv" },
+    { name: "Visit Shop", href: "https://store.iemt-lab.com" },
+  ],
+  services: [
+    { name: "ATV Conversion", href: "/converted-atv" },
+    { name: "Enhanced Kango ZE", href: "/kangoze-enhanced" },
+    { name: "Vehicle Conversions", href: "/converted-vehicles" },
   ],
   legal: [
     { name: "Terms and Conditions", href: "/#contact" },
@@ -61,10 +69,10 @@ export function Footer() {
       <div className="absolute bottom-0 right-1/4 w-60 h-60 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(186,230,253,0.03) 0%, transparent 60%)' }} />
       
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8">
           {/* Brand Column */}
           <Animated animation="slide-up" duration={1000} distance={50} className="lg:col-span-1">
-            <a href="#home" className="flex items-center gap-3 mb-6 group">
+            <Link href="/" className="flex items-center gap-3 mb-6 group">
               <div className="relative h-12 w-[160px] flex items-center">
                 <Image
                   src="/logos/full_transparent.svg"
@@ -73,7 +81,7 @@ export function Footer() {
                   className="transition-opacity duration-300 group-hover:opacity-80 object-contain object-left"
                 />
               </div>
-            </a>
+            </Link>
             <p className="text-ice-300 text-sm leading-relaxed mb-8 max-w-xs">
               Advancing Tomorrow: Innovating Electric Motors for a Transformative Experience.
             </p>
@@ -90,7 +98,7 @@ export function Footer() {
                   <a
                     href={link.href}
                     onClick={(e) => handleSectionNavigation(e, link.href)}
-                    className="text-ice-300 hover:text-ice-100 transition-colors duration-300 text-sm inline-block hover:translate-x-1 transition-transform"
+                    className="text-ice-300 hover:text-ice-100 text-sm inline-block hover:translate-x-1 transition-[color,transform] duration-300"
                     style={{ transitionDelay: `${index * 30}ms` }}
                   >
                     {link.name}
@@ -106,12 +114,41 @@ export function Footer() {
               Our Products
             </h4>
             <ul className="space-y-3">
-              {footerLinks.products.map((link, index) => (
+              {footerLinks.products.map((link, index) => {
+                const isExternal = link.href.startsWith('http');
+                return (
+                  <li key={link.name}>
+                    <a
+                      href={link.href}
+                      {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      onClick={isExternal ? undefined : (e) => handleSectionNavigation(e, link.href)}
+                      className="text-ice-300 hover:text-ice-100 text-sm inline-flex items-center gap-1 hover:translate-x-1 transition-[color,transform] duration-300"
+                      style={{ transitionDelay: `${index * 30}ms` }}
+                    >
+                      {link.name}
+                      {isExternal && (
+                        <svg className="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      )}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </Animated>
+
+          {/* Services */}
+          <Animated animation="slide-up" delay={300} duration={1000} distance={50}>
+            <h4 className="text-sm font-semibold text-ice-100 uppercase tracking-[0.15em] mb-5">
+              Our Services
+            </h4>
+            <ul className="space-y-3">
+              {footerLinks.services.map((link, index) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    onClick={(e) => handleSectionNavigation(e, link.href)}
-                    className="text-ice-300 hover:text-ice-100 transition-colors duration-300 text-sm inline-block hover:translate-x-1 transition-transform"
+                    className="text-ice-300 hover:text-ice-100 text-sm inline-block hover:translate-x-1 transition-[color,transform] duration-300"
                     style={{ transitionDelay: `${index * 30}ms` }}
                   >
                     {link.name}
@@ -122,7 +159,7 @@ export function Footer() {
           </Animated>
 
           {/* Contact Info */}
-          <Animated animation="slide-up" delay={360} duration={1000} distance={50}>
+          <Animated animation="slide-up" delay={420} duration={1000} distance={50}>
             <h4 className="text-sm font-semibold text-ice-100 uppercase tracking-[0.15em] mb-5">
               Contact Us
             </h4>
