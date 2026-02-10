@@ -13,6 +13,7 @@ import { PageLoader } from "@/components/ui/page-loader";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { handleSectionNavigation, handleInitialHash } from "@/lib/navigation";
+import { usePrices } from "@/lib/use-prices";
 import {
   validateContactForm,
   EMAIL_REGEX,
@@ -115,6 +116,7 @@ const conversionSteps = [
 const models = [
   {
     name: "EonTrail",
+    handle: "eontrail-electric-atv",
     tagline: "Entry-Level Adventure",
     description: "Built for smooth off-road adventures, the EonTrail delivers steady performance with dependable power. With a balanced top speed and solid range, it's the ideal choice for explorers who value reliability and control.",
     specs: {
@@ -132,6 +134,7 @@ const models = [
   },
   {
     name: "HyperGlide",
+    handle: "hyperglide-electric-atv",
     tagline: "Performance Balance",
     description: "HyperGlide combines speed, endurance, and smart connectivity in one well-balanced ride. Fast charging and real-time monitoring make it the perfect mix of thrill and efficiency for everyday adventures.",
     specs: {
@@ -149,6 +152,7 @@ const models = [
   },
   {
     name: "TitanVolt",
+    handle: "titanvolt-electric-atv",
     tagline: "Maximum Power",
     description: "Engineered for extreme performance, TitanVolt dominates with unmatched speed and range. Backed by intelligent cloud connectivity, it's the ultimate ride for those who demand maximum power and control.",
     specs: {
@@ -483,6 +487,7 @@ function ConversionInquirySection() {
 export default function ConvertedATVPage() {
   const [highlightedComponent, setHighlightedComponent] = useState<string | null>(null);
   const highlightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const prices = usePrices();
 
   // Cleanup highlight timeout on unmount
   useEffect(() => {
@@ -920,12 +925,12 @@ export default function ConvertedATVPage() {
                       </div>
                     </div>
 
-                    {/* Price - Monospace for prices per spec */}
+                    {/* Price - live from Shopify or hardcoded fallback */}
                     <div className="mb-6">
                       <div className="text-sm text-ice-500 mb-1">Starting price</div>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-bold text-gradient font-mono">{model.price}</span>
-                        <span className="text-ice-500 text-sm font-mono">/ {model.priceBGN}</span>
+                        <span className="text-3xl font-bold text-gradient font-mono">{prices?.[model.handle]?.formatted ?? model.price}</span>
+                        <span className="text-ice-500 text-sm font-mono">/ {prices?.[model.handle]?.formattedBGN ?? model.priceBGN}</span>
                       </div>
                     </div>
 

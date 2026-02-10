@@ -5,6 +5,7 @@ import { CardDark, CardHeader, CardTitleDark, CardDescriptionDark, CardContent, 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Animated } from "@/components/ui/animated";
+import { usePrices } from "@/lib/use-prices";
 
 const products = [
   {
@@ -68,6 +69,8 @@ const products = [
 ];
 
 export function ProductsSection() {
+  const prices = usePrices();
+
   return (
     <Section id="products" variant="dark">
       <SectionHeader
@@ -136,15 +139,15 @@ export function ProductsSection() {
                   </div>
                 </div>
 
-                {/* Price - live from Shopify or fallback */}
+                {/* Price - live from Shopify or hardcoded fallback */}
                 <div className="mb-2">
                   <div className="text-xs text-ice-500 mb-1">Starting from</div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-bold text-gradient font-mono">
-                      {product.price}
+                      {prices?.[product.handle]?.formatted ?? product.price}
                     </span>
                     <span className="text-ice-500 text-xs font-mono">
-                      / {product.priceBGN}
+                      / {prices?.[product.handle]?.formattedBGN ?? product.priceBGN}
                     </span>
                   </div>
                 </div>
