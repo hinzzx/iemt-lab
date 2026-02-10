@@ -138,7 +138,7 @@ export async function fetchShopifyPrices(): Promise<PriceMap> {
         "X-Shopify-Storefront-Access-Token": token,
       },
       body: JSON.stringify({ query }),
-      next: { revalidate: 3600 }, // Cache in Next.js Data Cache for 1 hour
+      next: { revalidate: 60 }, // Cache in Next.js Data Cache for 60 seconds
     },
   );
 

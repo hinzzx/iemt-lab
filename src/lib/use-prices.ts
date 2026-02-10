@@ -14,11 +14,11 @@ export interface ProductPrice {
 export type PriceMap = Record<string, ProductPrice>;
 
 // ---------------------------------------------------------------------------
-// Module-level cache — shared across all components that call usePrices()
+// Module-level dedup — prevents parallel fetches from multiple components
+// on the same page, but always refetches on a new page navigation.
 // ---------------------------------------------------------------------------
 
-let cachedPrices: PriceMap | null = null;
-let fetchPromise: Promise<PriceMap | null> | null = null;
+let activeFetch: Promise<PriceMap | null> | null = null;
 
 async function fetchPrices(): Promise<PriceMap | null> {
   try {
@@ -28,6 +28,9 @@ async function fetchPrices(): Promise<PriceMap | null> {
     return data.prices ?? null;
   } catch {
     return null;
+  } finally {
+    // Clear the dedup lock so the next page navigation refetches
+    activeFetch = null;
   }
 }
 
@@ -41,30 +44,21 @@ async function fetchPrices(): Promise<PriceMap | null> {
  * - Returns `null` while loading or if the fetch fails.
  * - Components should use hardcoded prices as fallback:
  *   `prices?.[handle]?.formatted ?? fallbackPrice`
- * - Module-level cache ensures only one network request regardless of how many
- *   components use the hook.
+ * - Deduplicates concurrent calls on the same page but refetches on every
+ *   new page navigation so prices stay fresh.
  */
 export function usePrices(): PriceMap | null {
-  const [prices, setPrices] = useState<PriceMap | null>(cachedPrices);
+  const [prices, setPrices] = useState<PriceMap | null>(null);
 
   useEffect(() => {
-    // Already cached from a previous render
-    if (cachedPrices) {
-      setPrices(cachedPrices);
-      return;
-    }
-
-    // Deduplicate concurrent fetches
-    if (!fetchPromise) {
-      fetchPromise = fetchPrices();
+    // Deduplicate concurrent fetches from multiple components on the same page
+    if (!activeFetch) {
+      activeFetch = fetchPrices();
     }
 
     let cancelled = false;
 
-    fetchPromise.then((result) => {
-      if (result) {
-        cachedPrices = result;
-      }
+    activeFetch.then((result) => {
       if (!cancelled) {
         setPrices(result);
       }
